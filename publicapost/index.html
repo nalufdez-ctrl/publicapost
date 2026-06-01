@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PublicaPost</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Superficie */
+      --bg:       #09090b;
+      --surface:  #111113;
+      --surface2: #1c1c1f;
+      --border:   #2a2a2e;
+      --text:     #fafafa;
+      --muted:    #8e8e93;
+      --radius:   14px;
+
+      /* Gradiente Instagram */
+      --ig: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+
+      /* Colores de plataforma */
+      --c-ig: #e1306c;
+      --c-li: #0a66c2;
+      --c-tw: #1d9bf0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 52px 20px 80px;
+    }
+
+    .wrap { max-width: 680px; margin: 0 auto; }
+
+    /* ── Header ── */
+    header { text-align: center; margin-bottom: 48px; }
+
+    .brand {
+      font-family: 'Sora', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      background: var(--ig);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+    }
+
+    .tagline {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 10px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Labels ── */
+    .label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .sublabel { color: var(--muted); font-size: 0.8rem; margin-bottom: 14px; }
+
+    /* ── Textarea ── */
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      min-height: 160px;
+      outline: none;
+      padding: 13px 16px;
+      resize: vertical;
+      transition: border-color .15s;
+    }
+
+    textarea:focus { border-color: #e1306c; }
+
+    /* ── Platform selector ── */
+    .platforms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+    .plat {
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      padding: 16px 10px 12px;
+      position: relative;
+      transition: background .15s, box-shadow .15s;
+    }
+
+    .plat .ico { font-size: 1.5rem; line-height: 1; }
+
+    .plat .star {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity .15s;
+      /* gradient text */
+      background: var(--ig);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Gradient border trick for active state */
+    .plat.active {
+      border: 2px solid transparent;
+      background:
+        linear-gradient(var(--surface2), var(--surface2)) padding-box,
+        var(--ig) border-box;
+      box-shadow: 0 0 14px rgba(220, 39, 67, 0.2);
+    }
+
+    .plat.active .star { opacity: 1; }
+
+    /* ── Generate button ── */
+    .gen-btn {
+      width: 100%;
+      background: var(--ig);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 17px;
+      transition: opacity .15s, transform .12s, box-shadow .15s;
+      margin-top: 4px;
+    }
+
+    .gen-btn:hover:not(:disabled) {
+      opacity: .9;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(220, 39, 67, 0.35);
+    }
+
+    .gen-btn:active:not(:disabled) { transform: translateY(0); opacity: 1; }
+    .gen-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Spinner ── */
+    .spin {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: rot .65s linear infinite;
+      display: none;
+      flex-shrink: 0;
+    }
+
+    @keyframes rot { to { transform: rotate(360deg); } }
+
+    /* ── Error ── */
+    .err {
+      background: rgba(220, 39, 67, .1);
+      border: 1px solid rgba(220, 39, 67, .35);
+      border-radius: 10px;
+      color: #f87171;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-top: 14px;
+      padding: 13px 16px;
+      display: none;
+    }
+
+    /* ── Results section ── */
+    #resultsWrap { margin-top: 24px; display: none; }
+    #resultsWrap.show { display: block; }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .results-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .clear-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.78rem;
+      padding: 5px 12px;
+      transition: color .15s, border-color .15s;
+    }
+
+    .clear-btn:hover { color: var(--text); border-color: #dc2743; }
+
+    /* ── Result card ── */
+    .res-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      overflow: hidden;
+      animation: fadeUp .25s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Featured: gradient top bar */
+    .res-card.featured::before {
+      content: '';
+      display: block;
+      height: 3px;
+      background: var(--ig);
+    }
+
+    .res-card.featured { border-color: #bc1888; }
+
+    .res-card-inner { padding: 18px 20px 16px; }
+
+    .res-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+
+    .res-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .plat-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .res-card[data-p="instagram"] .plat-dot { background: var(--c-ig); }
+    .res-card[data-p="linkedin"]  .plat-dot { background: var(--c-li); }
+    .res-card[data-p="twitter"]   .plat-dot { background: var(--c-tw); }
+
+    .badge {
+      border-radius: 4px;
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      text-transform: uppercase;
+      background: var(--ig);
+    }
+
+    .act-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      transition: color .15s, border-color .15s;
+    }
+
+    .act-btn:hover:not(:disabled) { color: var(--text); border-color: #e1306c; }
+    .act-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    hr.sep { border: none; border-top: 1px solid var(--border); margin: 0 0 14px; }
+
+    .res-body {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.93rem;
+      line-height: 1.75;
+      min-height: 60px;
+      padding: 14px 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .res-body.card-err {
+      color: #f87171;
+      background: rgba(220,39,67,.07);
+      border-color: rgba(220,39,67,.25);
+      font-size: 0.875rem;
+    }
+
+    .res-chars {
+      color: var(--muted);
+      font-size: 0.76rem;
+      margin-top: 9px;
+      text-align: right;
+    }
+
+    /* ── Skeleton ── */
+    .skel {
+      background: linear-gradient(90deg, var(--border) 25%, #333338 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 5px;
+      height: 13px;
+      margin-bottom: 10px;
+    }
+
+    .skel:last-child { margin-bottom: 0; width: 50%; }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">PublicaPost</div>
+    <p class="tagline">Convierte tu contenido en posts para todas las redes.</p>
+  </header>
+
+  <!-- Contenido -->
+  <div class="card">
+    <label class="label" for="content">Tu contenido</label>
+    <textarea id="content" placeholder="Pega aquí tu texto: un artículo, una idea, unas notas, un correo… lo que sea."></textarea>
+  </div>
+
+  <!-- Ver primero (opcional) -->
+  <div class="card">
+    <label class="label">Ver primero <span style="text-transform:none;font-weight:400;letter-spacing:0">(opcional)</span></label>
+    <p class="sublabel">La red seleccionada aparecerá destacada en los resultados.</p>
+    <div class="platforms">
+      <button class="plat active" data-p="instagram" onclick="pick(this)">
+        <span class="ico">📸</span>
+        Instagram
+        <span class="star">★ Primero</span>
+      </button>
+      <button class="plat" data-p="linkedin" onclick="pick(this)">
+        <span class="ico">💼</span>
+        LinkedIn
+        <span class="star">★ Primero</span>
+      </button>
+      <button class="plat" data-p="twitter" onclick="pick(this)">
+        <span class="ico">𝕏</span>
+        Twitter / X
+        <span class="star">★ Primero</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Botón -->
+  <button class="gen-btn" id="genBtn" onclick="generate()">
+    <span class="spin" id="spin"></span>
+    <span id="btnLabel">Generar los 3 posts</span>
+  </button>
+
+  <div class="err" id="err"></div>
+
+  <!-- Resultados -->
+  <div id="resultsWrap">
+    <div class="results-header">
+      <span class="results-title">Resultados</span>
+      <button class="clear-btn" onclick="clearAll()">Limpiar</button>
+    </div>
+    <div id="cardsList"></div>
+  </div>
+
+</div>
+
+<script>
+  // ─── State ────────────────────────────────────────────────
+  let preferred = 'instagram';
+
+  const PLATFORMS = ['instagram', 'linkedin', 'twitter'];
+
+  const META = {
+    instagram: { label: 'Instagram 📸' },
+    linkedin:  { label: 'LinkedIn 💼'  },
+    twitter:   { label: 'Twitter / X 𝕏' },
+  };
+
+  // ─── Platform selector ───────────────────────────────────
+  function pick(btn) {
+    const wasActive = btn.classList.contains('active');
+    document.querySelectorAll('.plat').forEach(b => b.classList.remove('active'));
+    if (!wasActive) {
+      btn.classList.add('active');
+      preferred = btn.dataset.p;
+    } else {
+      preferred = null;
+    }
+  }
+
+  // ─── UI helpers ──────────────────────────────────────────
+  function setLoading(on) {
+    document.getElementById('genBtn').disabled = on;
+    document.getElementById('spin').style.display = on ? 'block' : 'none';
+    document.getElementById('btnLabel').textContent = on ? 'Generando…' : 'Generar los 3 posts';
+  }
+
+  function showErr(msg) {
+    const el = document.getElementById('err');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function hideErr() { document.getElementById('err').style.display = 'none'; }
+
+  function clearAll() {
+    document.getElementById('resultsWrap').classList.remove('show');
+    document.getElementById('cardsList').innerHTML = '';
+  }
+
+  // ─── Skeleton cards ──────────────────────────────────────
+  function renderSkeletons(order) {
+    const list = document.getElementById('cardsList');
+    list.innerHTML = '';
+    order.forEach((p, i) => {
+      const featured = i === 0 && preferred;
+      list.insertAdjacentHTML('beforeend', `
+        <div class="res-card${featured ? ' featured' : ''}" id="card-${p}" data-p="${p}">
+          <div class="res-card-inner">
+            <div class="res-card-top">
+              <div class="res-card-title">
+                <span class="plat-dot"></span>
+                ${META[p].label}
+                ${featured ? '<span class="badge">Destacado</span>' : ''}
+              </div>
+              <button class="act-btn" id="copy-${p}" onclick="copyCard('${p}', this)" disabled>Copiar</button>
+            </div>
+            <hr class="sep">
+            <div class="res-body" id="body-${p}">
+              <div class="skel" style="width:88%"></div>
+              <div class="skel" style="width:74%"></div>
+              <div class="skel" style="width:81%"></div>
+              <div class="skel" style="width:50%"></div>
+            </div>
+            <div class="res-chars" id="chars-${p}"></div>
+          </div>
+        </div>
+      `);
+    });
+    document.getElementById('resultsWrap').classList.add('show');
+    document.getElementById('resultsWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function fillCard(p, text) {
+    const body    = document.getElementById(`body-${p}`);
+    const chars   = document.getElementById(`chars-${p}`);
+    const copyBtn = document.getElementById(`copy-${p}`);
+    body.innerHTML = '';
+    body.textContent = text;
+    chars.textContent = text.length + ' caracteres';
+    copyBtn.disabled = false;
+  }
+
+  function errorCard(p, msg) {
+    const body = document.getElementById(`body-${p}`);
+    body.innerHTML = '';
+    body.classList.add('card-err');
+    body.textContent = '⚠ ' + msg;
+  }
+
+  // ─── API call via Netlify function ───────────────────────
+  async function callAPI(platform, content) {
+    const res = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ platform, content }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data?.error || `Error ${res.status}`);
+    }
+
+    if (!data.text) throw new Error('Respuesta vacía del servidor.');
+    return data.text;
+  }
+
+  // ─── Generate ────────────────────────────────────────────
+  async function generate() {
+    const content = document.getElementById('content').value.trim();
+
+    hideErr();
+
+    if (!content)            return showErr('Pega el contenido que quieres adaptar.');
+    if (content.length < 30) return showErr('El contenido es demasiado corto. Añade más texto.');
+
+    setLoading(true);
+
+    const others = PLATFORMS.filter(p => p !== preferred);
+    const order  = preferred ? [preferred, ...others] : PLATFORMS;
+
+    renderSkeletons(order);
+
+    let allFailed = true;
+    await Promise.all(order.map(p =>
+      callAPI(p, content)
+        .then(text => { allFailed = false; fillCard(p, text); })
+        .catch(e   => errorCard(p, e.message))
+    ));
+
+    if (allFailed) showErr('No se pudo generar ningún post. Comprueba la configuración del servidor.');
+
+    setLoading(false);
+  }
+
+  // ─── Copy ────────────────────────────────────────────────
+  function copyCard(p, btn) {
+    const text = document.getElementById(`body-${p}`).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '¡Copiado!';
+      setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+    });
+  }
+
+  // ─── Cmd/Ctrl+Enter ──────────────────────────────────────
+  document.getElementById('content').addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') generate();
+  });
+</script>
+</body>
+</html>
