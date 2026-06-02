@@ -54,7 +54,7 @@
       position: relative; z-index: 10;
       display: flex; align-items: center; justify-content: space-between;
       max-width: 1080px; margin: 0 auto;
-      padding: 26px 32px;
+      padding: 22px 32px;
       border-bottom: 1px solid var(--border);
     }
 
@@ -65,12 +65,37 @@
       text-decoration: none;
     }
 
-    .nav-back {
-      color: var(--muted); font-size: 0.84rem; font-weight: 600;
-      text-decoration: none; display: flex; align-items: center; gap: 6px;
-      transition: color .15s;
+    .nav-right {
+      display: flex; align-items: center; gap: 12px;
     }
-    .nav-back:hover { color: var(--text); }
+
+    .nav-uses {
+      font-size: 0.76rem; color: var(--muted); font-weight: 400;
+    }
+
+    .nav-user-email {
+      font-size: 0.78rem; color: var(--muted);
+      max-width: 160px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .nav-btn {
+      font-family: inherit; font-size: 0.82rem; font-weight: 600;
+      padding: 7px 14px; border-radius: 8px; cursor: pointer;
+      text-decoration: none; border: 1px solid var(--border);
+      transition: color .15s, border-color .15s, background .15s;
+      display: inline-flex; align-items: center;
+    }
+
+    .nav-btn.login {
+      background: var(--surface2); color: var(--text);
+    }
+    .nav-btn.login:hover { border-color: var(--border-h); }
+
+    .nav-btn.logout {
+      background: none; color: var(--muted);
+    }
+    .nav-btn.logout:hover { color: var(--text); border-color: var(--border-h); }
 
     /* ── Layout ── */
     .wrap {
@@ -198,9 +223,7 @@
       padding: 12px 16px; text-align: center;
       transition: border-color .15s, color .15s, transform .1s;
     }
-
     .tone-btn:hover { border-color: var(--border-h); color: var(--text); transform: translateY(-1px); }
-
     .tone-btn.active {
       border: 2px solid transparent;
       background: linear-gradient(var(--surface2), var(--surface2)) padding-box, var(--ig) border-box;
@@ -403,9 +426,7 @@
     #historyWrap { margin-top: 56px; display: none; }
     #historyWrap.show { display: block; }
 
-    .hist-divider {
-      border: none; border-top: 1px solid var(--border); margin-bottom: 32px;
-    }
+    .hist-divider { border: none; border-top: 1px solid var(--border); margin-bottom: 32px; }
 
     .hist-session {
       background: var(--surface); border: 1px solid var(--border);
@@ -414,8 +435,7 @@
 
     .hist-head {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 18px; cursor: pointer;
-      transition: background .15s;
+      padding: 14px 18px; cursor: pointer; transition: background .15s;
     }
     .hist-head:hover { background: var(--surface2); }
 
@@ -428,18 +448,12 @@
       border: 1px solid var(--border); color: var(--muted);
     }
 
-    .hist-lbl {
-      font-size: 0.82rem; font-weight: 600; color: var(--text);
-    }
-
-    .hist-date {
-      font-size: 0.75rem; color: var(--muted);
-    }
+    .hist-lbl { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .hist-date { font-size: 0.75rem; color: var(--muted); }
 
     .hist-arrow {
       font-size: 0.8rem; color: var(--muted);
       flex-shrink: 0; margin-left: 12px;
-      transition: transform .2s;
     }
 
     .hist-body {
@@ -463,9 +477,7 @@
       font-size: 0.8rem; font-weight: 700;
     }
 
-    .hist-plat-dot {
-      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-    }
+    .hist-plat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
     .hist-post-text {
       font-size: 0.88rem; line-height: 1.72;
@@ -474,11 +486,69 @@
       -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
       mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
     }
-
     .hist-post-text.expanded {
       max-height: none;
-      -webkit-mask-image: none;
-      mask-image: none;
+      -webkit-mask-image: none; mask-image: none;
+    }
+
+    /* ── Upgrade modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.65); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px 32px 32px;
+      max-width: 400px; width: 100%;
+      position: relative; text-align: center;
+      animation: fadeUp .22s ease;
+    }
+
+    .modal-close {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 1rem; padding: 4px 8px;
+      font-family: inherit; transition: color .15s;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .modal-icon { font-size: 2.2rem; margin-bottom: 14px; line-height: 1; }
+
+    .modal h2 {
+      font-size: 1.2rem; font-weight: 800;
+      letter-spacing: -0.03em; margin-bottom: 10px;
+    }
+
+    .modal p {
+      font-size: 0.87rem; color: var(--muted);
+      line-height: 1.65; margin-bottom: 28px;
+    }
+
+    .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+
+    .modal-cta {
+      display: block; width: 100%; padding: 14px 20px;
+      border-radius: 12px; font-family: inherit;
+      font-size: 0.93rem; font-weight: 700;
+      text-align: center; text-decoration: none; cursor: pointer;
+      transition: opacity .15s, transform .15s; border: none;
+    }
+    .modal-cta:hover { opacity: .9; transform: translateY(-1px); }
+
+    .modal-cta.primary { background: var(--ig); color: #fff; }
+
+    .modal-cta.secondary {
+      background: none; border: 1px solid var(--border);
+      color: var(--text); font-family: inherit;
+    }
+    .modal-cta.secondary:hover { border-color: var(--border-h); }
+
+    .modal-uses-left {
+      font-size: 0.76rem; color: var(--muted);
+      margin-top: 16px;
     }
   </style>
 </head>
@@ -486,7 +556,9 @@
 
   <nav>
     <a href="/" class="nav-brand">PublicaPost</a>
-    <a href="/" class="nav-back">← Inicio</a>
+    <div class="nav-right" id="navRight">
+      <!-- filled by JS -->
+    </div>
   </nav>
 
   <div class="wrap">
@@ -508,7 +580,7 @@
       </button>
     </div>
 
-    <!-- Step 01 — Adapt mode: content textarea -->
+    <!-- Step 01 — Adapt mode -->
     <div id="adaptSection" class="section">
       <div class="section-head">
         <span class="step-num">01</span>
@@ -522,7 +594,7 @@
       </div>
     </div>
 
-    <!-- Step 01 — Ideas mode: business description -->
+    <!-- Step 01 — Ideas mode -->
     <div id="ideasSection" class="section" style="display:none">
       <div class="section-head">
         <span class="step-num">01</span>
@@ -548,10 +620,10 @@
       </div>
       <div class="card">
         <div class="tones">
-          <button class="tone-btn active" data-t="profesional" onclick="pickTone(this)">Profesional</button>
-          <button class="tone-btn" data-t="cercano" onclick="pickTone(this)">Cercano y divertido</button>
-          <button class="tone-btn" data-t="inspiracional" onclick="pickTone(this)">Inspiracional</button>
-          <button class="tone-btn" data-t="directo" onclick="pickTone(this)">Directo</button>
+          <button class="tone-btn active" data-t="profesional"   onclick="pickTone(this)">Profesional</button>
+          <button class="tone-btn"        data-t="cercano"        onclick="pickTone(this)">Cercano y divertido</button>
+          <button class="tone-btn"        data-t="inspiracional"  onclick="pickTone(this)">Inspiracional</button>
+          <button class="tone-btn"        data-t="directo"        onclick="pickTone(this)">Directo</button>
         </div>
       </div>
     </div>
@@ -571,28 +643,23 @@
       <div class="card">
         <div class="platforms">
           <button class="plat active" data-p="instagram" onclick="pick(this)">
-            <span class="ico">📸</span>
-            Instagram
+            <span class="ico">📸</span>Instagram
             <span class="star" id="star-instagram">★ Primero</span>
           </button>
           <button class="plat" data-p="linkedin" onclick="pick(this)">
-            <span class="ico">💼</span>
-            LinkedIn
+            <span class="ico">💼</span>LinkedIn
             <span class="star" id="star-linkedin">★ Primero</span>
           </button>
           <button class="plat" data-p="twitter" onclick="pick(this)">
-            <span class="ico">𝕏</span>
-            Twitter / X
+            <span class="ico">𝕏</span>Twitter / X
             <span class="star" id="star-twitter">★ Primero</span>
           </button>
           <button class="plat" data-p="facebook" onclick="pick(this)">
-            <span class="ico">👥</span>
-            Facebook
+            <span class="ico">👥</span>Facebook
             <span class="star" id="star-facebook">★ Primero</span>
           </button>
           <button class="plat" data-p="tiktok" onclick="pick(this)">
-            <span class="ico">🎵</span>
-            TikTok
+            <span class="ico">🎵</span>TikTok
             <span class="star" id="star-tiktok">★ Primero</span>
           </button>
         </div>
@@ -628,7 +695,86 @@
 
   </div>
 
+  <!-- Upgrade modal -->
+  <div class="modal-overlay" id="upgradeModal" onclick="handleOverlayClick(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-icon">✦</div>
+      <h2>Has agotado tus usos gratuitos</h2>
+      <p>Crea una cuenta gratis — sin tarjeta de crédito — para generar posts sin límite.</p>
+      <div class="modal-actions">
+        <a href="/auth.html" class="modal-cta primary">Crear cuenta gratis</a>
+        <a href="/auth.html?modo=login" class="modal-cta secondary">Ya tengo cuenta · Iniciar sesión</a>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  // ─── Supabase ─────────────────────────────────────────────
+  const { createClient } = window.supabase;
+  const sb = createClient(
+    'https://znzsjnfqmegnszwyttxe.supabase.co',
+    'sb_publishable_fnq14OvDXOOUkUP1_sYc_A_mC1nDUi7'
+  );
+
+  let currentUser = null;
+
+  async function initAuth() {
+    const { data: { session } } = await sb.auth.getSession();
+    currentUser = session?.user ?? null;
+    renderNav();
+
+    sb.auth.onAuthStateChange((_ev, session) => {
+      currentUser = session?.user ?? null;
+      renderNav();
+    });
+  }
+
+  function renderNav() {
+    const el = document.getElementById('navRight');
+    if (currentUser) {
+      el.innerHTML = `
+        <span class="nav-user-email">${escHtml(currentUser.email)}</span>
+        <button class="nav-btn logout" onclick="logout()">Salir</button>`;
+    } else {
+      const left = Math.max(0, FREE_LIMIT - getUses());
+      el.innerHTML = `
+        <span class="nav-uses">${left} ${left === 1 ? 'uso gratis' : 'usos gratis'}</span>
+        <a href="/auth.html" class="nav-btn login">Iniciar sesión</a>`;
+    }
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+  }
+
+  // ─── Usage counter ────────────────────────────────────────
+  const FREE_LIMIT = 3;
+  const USES_KEY   = 'pp_uses';
+
+  function getUses() {
+    return parseInt(localStorage.getItem(USES_KEY) || '0', 10);
+  }
+
+  function incrementUses() {
+    localStorage.setItem(USES_KEY, String(getUses() + 1));
+    renderNav();
+  }
+
+  // ─── Upgrade modal ────────────────────────────────────────
+  function showUpgradeModal() {
+    document.getElementById('upgradeModal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('upgradeModal').classList.remove('show');
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === e.currentTarget) closeModal();
+  }
+
   // ─── State ────────────────────────────────────────────────
   let mode      = 'adapt';
   let preferred = 'instagram';
@@ -665,9 +811,9 @@
     document.getElementById('ideasSection').style.display = newMode === 'ideas' ? 'block' : 'none';
 
     const isIdeas = newMode === 'ideas';
-    document.getElementById('platLabel').textContent         = isIdeas ? 'Red social' : 'Ver primero';
-    document.getElementById('platOptional').style.display    = isIdeas ? 'none' : 'inline';
-    document.getElementById('platHint').textContent          = isIdeas
+    document.getElementById('platLabel').textContent      = isIdeas ? 'Red social' : 'Ver primero';
+    document.getElementById('platOptional').style.display = isIdeas ? 'none' : 'inline';
+    document.getElementById('platHint').textContent       = isIdeas
       ? 'Elige para qué red quieres las 5 ideas.'
       : 'La red elegida aparecerá destacada en los resultados.';
 
@@ -682,7 +828,6 @@
     }
 
     document.getElementById('btnLabel').textContent = isIdeas ? 'Generar 5 ideas' : 'Generar los 5 posts';
-
     clearAll();
     hideErr();
   }
@@ -704,12 +849,8 @@
     }
     const wasActive = btn.classList.contains('active');
     document.querySelectorAll('.plat').forEach(b => b.classList.remove('active'));
-    if (!wasActive) {
-      btn.classList.add('active');
-      preferred = btn.dataset.p;
-    } else {
-      preferred = null;
-    }
+    if (!wasActive) { btn.classList.add('active'); preferred = btn.dataset.p; }
+    else            { preferred = null; }
   }
 
   // ─── UI helpers ──────────────────────────────────────────
@@ -723,10 +864,8 @@
 
   function showErr(msg) {
     const el = document.getElementById('err');
-    el.textContent = msg;
-    el.style.display = 'block';
+    el.textContent = msg; el.style.display = 'block';
   }
-
   function hideErr() { document.getElementById('err').style.display = 'none'; }
 
   function clearAll() {
@@ -736,6 +875,10 @@
 
   // ─── Generate (router) ───────────────────────────────────
   function generate() {
+    if (!currentUser) {
+      if (getUses() >= FREE_LIMIT) { showUpgradeModal(); return; }
+      incrementUses();
+    }
     if (mode === 'ideas') generateIdeas();
     else generateAdapt();
   }
@@ -767,11 +910,8 @@
         .catch(e => errorCard(`body-${p}`, e.message))
     ));
 
-    if (allFailed) {
-      showErr('No se pudo generar ningún post. Comprueba la configuración del servidor.');
-    } else {
-      saveSession({ mode: 'adapt', tone, posts });
-    }
+    if (allFailed) showErr('No se pudo generar ningún post. Comprueba la configuración del servidor.');
+    else saveSession({ mode: 'adapt', tone, posts });
     setLoading(false);
   }
 
@@ -841,7 +981,7 @@
             <div class="res-card-top">
               <div class="res-card-title">
                 <span class="plat-dot"></span>
-                <span class="idea-num">Idea ${String(i + 1).padStart(2, '0')}</span>
+                <span class="idea-num">Idea ${String(i+1).padStart(2,'0')}</span>
                 ${META[platform].label}
               </div>
               <button class="act-btn" id="idea-copy-${i}" onclick="copyText('idea-body-${i}', this)" disabled>Copiar</button>
@@ -878,16 +1018,13 @@
 
   function fillBody(id, text) {
     const el = document.getElementById(id);
-    el.innerHTML = '';
-    el.textContent = text;
+    el.innerHTML = ''; el.textContent = text;
   }
 
   function errorCard(bodyId, msg) {
     const el = document.getElementById(bodyId);
     if (!el) return;
-    el.innerHTML = '';
-    el.classList.add('card-err');
-    el.textContent = '⚠ ' + msg;
+    el.innerHTML = ''; el.classList.add('card-err'); el.textContent = '⚠ ' + msg;
   }
 
   function showResults() {
@@ -910,21 +1047,18 @@
       headers: { 'content-type': 'application/json' },
       body:    JSON.stringify({ type, platform, content, tone }),
     });
-
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data?.error || `Error ${res.status}`);
     return data;
   }
 
   // ─── History ─────────────────────────────────────────────
-  const HIST_KEY   = 'pp_history';
-  const HIST_MAX   = 10;
+  const HIST_KEY  = 'pp_history';
+  const HIST_MAX  = 10;
 
   const TONE_NAMES = {
-    profesional:   'Profesional',
-    cercano:       'Cercano',
-    inspiracional: 'Inspiracional',
-    directo:       'Directo',
+    profesional: 'Profesional', cercano: 'Cercano',
+    inspiracional: 'Inspiracional', directo: 'Directo',
   };
 
   function getHistory() {
@@ -934,10 +1068,10 @@
 
   function saveSession({ mode, tone, posts }) {
     if (!posts.length) return;
-    const history = getHistory();
-    history.unshift({ id: Date.now(), timestamp: new Date().toISOString(), mode, tone, posts });
-    if (history.length > HIST_MAX) history.length = HIST_MAX;
-    localStorage.setItem(HIST_KEY, JSON.stringify(history));
+    const h = getHistory();
+    h.unshift({ id: Date.now(), timestamp: new Date().toISOString(), mode, tone, posts });
+    if (h.length > HIST_MAX) h.length = HIST_MAX;
+    localStorage.setItem(HIST_KEY, JSON.stringify(h));
     renderHistory();
   }
 
@@ -952,65 +1086,50 @@
       + ' · ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   }
 
-  function sessionLabel(session) {
-    if (session.mode === 'ideas') {
-      const p = session.posts[0]?.platform;
+  function sessionLabel(s) {
+    if (s.mode === 'ideas') {
+      const p = s.posts[0]?.platform;
       return `5 ideas · ${p ? META[p].label : ''}`;
     }
-    const platforms = [...new Set(session.posts.map(p => p.platform))];
-    return platforms.map(p => META[p]?.label || p).join(', ');
+    return [...new Set(s.posts.map(p => p.platform))].map(p => META[p]?.label || p).join(', ');
   }
 
   function renderHistory() {
     const history = getHistory();
-    const wrap = document.getElementById('historyWrap');
-    const list = document.getElementById('historyList');
+    const wrap    = document.getElementById('historyWrap');
+    const list    = document.getElementById('historyList');
 
-    if (!history.length) {
-      wrap.classList.remove('show');
-      return;
-    }
+    if (!history.length) { wrap.classList.remove('show'); return; }
 
     wrap.classList.add('show');
     list.innerHTML = '';
 
-    history.forEach(session => {
-      const id  = session.id;
-      const lbl = sessionLabel(session);
-      const modeTag  = session.mode === 'ideas' ? 'Ideas' : 'Adaptar';
-      const toneTag  = TONE_NAMES[session.tone] || session.tone;
-
-      const postsHtml = session.posts.map((post, idx) => {
-        const platColor = PLAT_COLORS[post.platform] || 'var(--muted)';
-        const platLabel = META[post.platform]?.label || post.platform;
-        const ideaLabel = post.ideaNum ? `<span class="idea-num">Idea ${String(post.ideaNum).padStart(2,'0')}</span> ` : '';
-        return `
-          <div class="hist-post">
-            <div class="hist-post-head">
-              <div class="hist-post-plat">
-                <span class="hist-plat-dot" style="background:${platColor}"></span>
-                ${ideaLabel}${platLabel}
-              </div>
-              <button class="act-btn" id="hcopy-${id}-${idx}" onclick="copyHistPost(${id}, ${idx})">Copiar</button>
+    history.forEach(s => {
+      const postsHtml = s.posts.map((post, idx) => `
+        <div class="hist-post">
+          <div class="hist-post-head">
+            <div class="hist-post-plat">
+              <span class="hist-plat-dot" style="background:${PLAT_COLORS[post.platform] || 'var(--muted)'}"></span>
+              ${post.ideaNum ? `<span class="idea-num">Idea ${String(post.ideaNum).padStart(2,'0')}</span> ` : ''}
+              ${escHtml(META[post.platform]?.label || post.platform)}
             </div>
-            <div class="hist-post-text" id="htext-${id}-${idx}">${escHtml(post.text)}</div>
-          </div>`;
-      }).join('');
+            <button class="act-btn" id="hcopy-${s.id}-${idx}" onclick="copyHistPost(${s.id}, ${idx})">Copiar</button>
+          </div>
+          <div class="hist-post-text" id="htext-${s.id}-${idx}">${escHtml(post.text)}</div>
+        </div>`).join('');
 
       list.insertAdjacentHTML('beforeend', `
         <div class="hist-session">
-          <div class="hist-head" onclick="toggleSession(${id})">
+          <div class="hist-head" onclick="toggleSession(${s.id})">
             <div class="hist-meta">
-              <span class="hist-tag">${escHtml(modeTag)}</span>
-              <span class="hist-tag">${escHtml(toneTag)}</span>
-              <span class="hist-lbl">${escHtml(lbl)}</span>
-              <span class="hist-date">${formatDate(session.timestamp)}</span>
+              <span class="hist-tag">${s.mode === 'ideas' ? 'Ideas' : 'Adaptar'}</span>
+              <span class="hist-tag">${escHtml(TONE_NAMES[s.tone] || s.tone)}</span>
+              <span class="hist-lbl">${escHtml(sessionLabel(s))}</span>
+              <span class="hist-date">${formatDate(s.timestamp)}</span>
             </div>
-            <span class="hist-arrow" id="harrow-${id}">▾</span>
+            <span class="hist-arrow" id="harrow-${s.id}">▾</span>
           </div>
-          <div class="hist-body" id="hbody-${id}">
-            ${postsHtml}
-          </div>
+          <div class="hist-body" id="hbody-${s.id}">${postsHtml}</div>
         </div>`);
     });
   }
@@ -1023,8 +1142,7 @@
   }
 
   function copyHistPost(sessionId, postIdx) {
-    const history = getHistory();
-    const session = history.find(s => s.id === sessionId);
+    const session = getHistory().find(s => s.id === sessionId);
     const text    = session?.posts[postIdx]?.text;
     if (!text) return;
     navigator.clipboard.writeText(text).then(() => {
@@ -1035,10 +1153,8 @@
 
   function escHtml(str) {
     return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   // ─── Keyboard shortcut ───────────────────────────────────
@@ -1048,6 +1164,7 @@
 
   // ─── Init ────────────────────────────────────────────────
   renderHistory();
+  initAuth();
 </script>
 </body>
 </html>

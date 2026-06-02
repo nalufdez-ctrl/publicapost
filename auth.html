@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PublicaPost — Acceso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #09090b;
+      --surface:  #111113;
+      --surface2: #1c1c1f;
+      --border:   #2a2a2e;
+      --border-h: #3a3a3e;
+      --text:     #fafafa;
+      --muted:    #8e8e93;
+      --radius:   14px;
+      --ig:       linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -220px; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 600px;
+      background: radial-gradient(ellipse at center,
+        rgba(220,39,67,.10) 0%, rgba(188,24,136,.05) 45%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1080px; margin: 0 auto;
+      padding: 26px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-size: 1.1rem; font-weight: 800; letter-spacing: -0.03em;
+      background: var(--ig);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-decoration: none;
+    }
+
+    .nav-back {
+      color: var(--muted); font-size: 0.84rem; font-weight: 600;
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+      transition: color .15s;
+    }
+    .nav-back:hover { color: var(--text); }
+
+    /* ── Layout ── */
+    .wrap {
+      position: relative; z-index: 1;
+      max-width: 440px; margin: 0 auto;
+      padding: 56px 24px 96px;
+    }
+
+    /* ── Header ── */
+    .auth-header { text-align: center; margin-bottom: 36px; }
+
+    .auth-header h1 {
+      font-size: 1.55rem; font-weight: 800; letter-spacing: -0.04em;
+    }
+
+    .auth-header h1 span {
+      background: var(--ig);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .auth-header p {
+      color: var(--muted); font-size: 0.88rem; line-height: 1.6; margin-top: 8px;
+    }
+
+    /* ── Card ── */
+    .auth-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 32px;
+    }
+
+    /* ── Tab toggle ── */
+    .auth-tabs {
+      display: flex;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 11px; padding: 4px; gap: 4px;
+      margin-bottom: 28px;
+    }
+
+    .auth-tab {
+      flex: 1; background: none; border: none;
+      border-radius: 8px; cursor: pointer;
+      font-family: inherit; font-size: 0.86rem; font-weight: 600;
+      padding: 10px; color: var(--muted);
+      transition: background .15s, color .15s;
+    }
+    .auth-tab:hover:not(.active) { color: var(--text); }
+    .auth-tab.active { background: var(--surface); color: var(--text); }
+
+    /* ── Form ── */
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block; font-size: 0.8rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 7px; letter-spacing: 0.01em;
+    }
+
+    .field input {
+      width: 100%; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 10px;
+      color: var(--text); font-family: inherit;
+      font-size: 0.93rem; font-weight: 400;
+      outline: none; padding: 13px 16px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field input::placeholder { color: var(--muted); }
+    .field input:focus {
+      border-color: #dc2743;
+      box-shadow: 0 0 0 3px rgba(220,39,67,.12);
+    }
+
+    /* ── Submit button ── */
+    .submit-btn {
+      width: 100%; background: var(--ig); border: none; border-radius: 12px;
+      color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-family: inherit; font-size: 0.95rem; font-weight: 700;
+      padding: 16px; margin-top: 8px;
+      transition: opacity .15s, transform .15s;
+    }
+    .submit-btn:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+    .submit-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── Spinner ── */
+    .spin {
+      width: 16px; height: 16px;
+      border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff;
+      border-radius: 50%; animation: rot .65s linear infinite;
+      display: none; flex-shrink: 0;
+    }
+    @keyframes rot { to { transform: rotate(360deg); } }
+
+    /* ── Messages ── */
+    .auth-msg {
+      border-radius: 10px; font-size: 0.86rem; font-weight: 400;
+      line-height: 1.55; margin-top: 16px; padding: 13px 16px;
+      display: none;
+    }
+    .auth-msg.show { display: block; }
+    .auth-msg.error {
+      background: rgba(220,39,67,.08); border: 1px solid rgba(220,39,67,.3); color: #f87171;
+    }
+    .auth-msg.success {
+      background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.3); color: #4ade80;
+    }
+    .auth-msg.info {
+      background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.3); color: #a5b4fc;
+    }
+
+    /* ── Switch link ── */
+    .auth-switch {
+      margin-top: 24px; text-align: center;
+      font-size: 0.84rem; color: var(--muted);
+    }
+
+    .switch-btn {
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: inherit; font-weight: 600;
+      color: var(--text); text-decoration: underline;
+      text-underline-offset: 3px; padding: 0;
+      transition: opacity .15s;
+    }
+    .switch-btn:hover { opacity: .75; }
+
+    /* ── Divider ── */
+    .auth-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    /* ── Benefits blurb ── */
+    .benefits {
+      text-align: center; margin-top: 28px;
+    }
+    .benefits p {
+      font-size: 0.8rem; color: var(--muted); line-height: 1.7;
+    }
+    .benefits strong { color: var(--text); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-brand">PublicaPost</a>
+    <a href="/app.html" class="nav-back">← Herramienta</a>
+  </nav>
+
+  <div class="wrap">
+
+    <div class="auth-header">
+      <h1>Accede a <span>PublicaPost</span></h1>
+      <p>Crea una cuenta gratis para generaciones ilimitadas.</p>
+    </div>
+
+    <div class="auth-card">
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-register" onclick="setTab('register')">Crear cuenta</button>
+        <button class="auth-tab" id="tab-login" onclick="setTab('login')">Iniciar sesión</button>
+      </div>
+
+      <form id="authForm" onsubmit="handleSubmit(event)" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" required autocomplete="email" placeholder="tu@email.com">
+        </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" required autocomplete="current-password"
+            placeholder="Mínimo 6 caracteres" minlength="6">
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span class="spin" id="spin"></span>
+          <span id="submitLabel">Crear cuenta</span>
+        </button>
+      </form>
+
+      <div class="auth-msg" id="msg"></div>
+
+      <p class="auth-switch">
+        <span id="switchText">¿Ya tienes cuenta?</span>
+        <button class="switch-btn" id="switchBtn" onclick="setTab('login')">Inicia sesión</button>
+      </p>
+
+    </div>
+
+    <div class="benefits">
+      <p>
+        <strong>Empieza gratis.</strong><br>
+        3 generaciones gratis, sin tarjeta.
+      </p>
+    </div>
+
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const { createClient } = window.supabase;
+  const sb = createClient(
+    'https://znzsjnfqmegnszwyttxe.supabase.co',
+    'sb_publishable_fnq14OvDXOOUkUP1_sYc_A_mC1nDUi7'
+  );
+
+  let currentTab = 'register';
+
+  // If already logged in, go straight to app
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) window.location.replace('/app.html');
+  });
+
+  // Pre-select tab from URL (?modo=login)
+  const urlTab = new URLSearchParams(window.location.search).get('modo');
+  if (urlTab === 'login') setTab('login');
+
+  // ─── Tab logic ───────────────────────────────────────────
+  function setTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+
+    const isReg = tab === 'register';
+    document.getElementById('submitLabel').textContent   = isReg ? 'Crear cuenta' : 'Iniciar sesión';
+    document.getElementById('switchText').textContent    = isReg ? '¿Ya tienes cuenta?' : '¿Aún no tienes cuenta?';
+    document.getElementById('switchBtn').textContent     = isReg ? 'Inicia sesión' : 'Créala, es gratis';
+    document.getElementById('switchBtn').onclick         = () => setTab(isReg ? 'login' : 'register');
+    document.getElementById('password').autocomplete    = isReg ? 'new-password' : 'current-password';
+    clearMsg();
+  }
+
+  // ─── Submit ──────────────────────────────────────────────
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) return;
+
+    setLoading(true);
+    clearMsg();
+
+    try {
+      if (currentTab === 'register') {
+        const { data, error } = await sb.auth.signUp({ email, password });
+        if (error) throw error;
+        if (data.session) {
+          window.location.replace('/app.html');
+        } else {
+          showMsg('¡Cuenta creada! Revisa tu bandeja de entrada para confirmar el registro.', 'success');
+          setLoading(false);
+        }
+      } else {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        window.location.replace('/app.html');
+      }
+    } catch (err) {
+      showMsg(translateError(err.message), 'error');
+      setLoading(false);
+    }
+  }
+
+  function translateError(msg) {
+    if (msg.includes('Invalid login credentials'))   return 'Email o contraseña incorrectos.';
+    if (msg.includes('Email not confirmed'))         return 'Confirma tu email antes de iniciar sesión. Revisa tu bandeja de entrada.';
+    if (msg.includes('User already registered'))     return 'Ya existe una cuenta con ese email. Prueba a iniciar sesión.';
+    if (msg.includes('Password should be at least')) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (msg.includes('Unable to validate email'))    return 'El formato del email no es válido.';
+    if (msg.includes('signup is disabled'))          return 'El registro está desactivado temporalmente.';
+    return msg;
+  }
+
+  // ─── UI helpers ──────────────────────────────────────────
+  function setLoading(on) {
+    document.getElementById('submitBtn').disabled        = on;
+    document.getElementById('spin').style.display        = on ? 'block' : 'none';
+    document.getElementById('submitLabel').textContent   = on
+      ? 'Un momento…'
+      : (currentTab === 'register' ? 'Crear cuenta' : 'Iniciar sesión');
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = `auth-msg show ${type}`;
+  }
+
+  function clearMsg() {
+    const el = document.getElementById('msg');
+    el.textContent = '';
+    el.className = 'auth-msg';
+  }
+</script>
+</body>
+</html>
