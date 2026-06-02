@@ -272,11 +272,18 @@
 
   // If already logged in, go straight to app
   sb.auth.getSession().then(({ data: { session } }) => {
-    if (session) window.location.replace('/app.html');
+    if (session) window.location.replace(getRedirect());
   });
 
   // Pre-select tab from URL (?modo=login)
-  const urlTab = new URLSearchParams(window.location.search).get('modo');
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTab = urlParams.get('modo');
+
+  function getRedirect() {
+    const r = urlParams.get('redirect');
+    // Only allow relative paths to prevent open redirect
+    return (r && r.startsWith('/')) ? r : '/app.html';
+  }
   if (urlTab === 'login') setTab('login');
 
   // ─── Tab logic ───────────────────────────────────────────
@@ -310,7 +317,7 @@
         const { data, error } = await sb.auth.signUp({ email, password });
         if (error) throw error;
         if (data.session) {
-          window.location.replace('/app.html');
+          window.location.replace(getRedirect());
         } else {
           showMsg('¡Cuenta creada! Revisa tu bandeja de entrada para confirmar el registro.', 'success');
           setLoading(false);
@@ -318,7 +325,7 @@
       } else {
         const { error } = await sb.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        window.location.replace('/app.html');
+        window.location.replace(getRedirect());
       }
     } catch (err) {
       showMsg(translateError(err.message), 'error');
