@@ -638,8 +638,7 @@
   async function generateIdeas() {
     const business = document.getElementById('business').value.trim();
     hideErr();
-    if (!business)           return showErr('Describe tu negocio o sector para continuar.');
-    if (business.length < 5) return showErr('Añade un poco más de descripción (al menos unas palabras).');
+    if (!business) return showErr('Describe tu negocio o sector para continuar.');
     if (!preferred)          return showErr('Elige una red social.');
 
     setLoading(true);
@@ -734,10 +733,10 @@
 
   // ─── API ─────────────────────────────────────────────────
   async function callAPI({ type, platform, content }) {
-    const res = await fetch(window.location.origin + '/.netlify/functions/generate', {
-      method: 'POST',
+    const res  = await fetch('/.netlify/functions/generate', {
+      method:  'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ type, platform, content }),
+      body:    JSON.stringify({ type, platform, content }),
     });
 
     const data = await res.json().catch(() => ({}));
