@@ -35,163 +35,149 @@
       overflow-x: hidden;
     }
 
-    /* ── Background glow ── */
     body::before {
       content: '';
       position: fixed;
-      top: -220px;
-      left: 50%;
+      top: -220px; left: 50%;
       transform: translateX(-50%);
-      width: 900px;
-      height: 600px;
+      width: 900px; height: 600px;
       background: radial-gradient(ellipse at center,
-        rgba(220,39,67,.10) 0%,
-        rgba(188,24,136,.05) 45%,
-        transparent 70%);
+        rgba(220,39,67,.10) 0%, rgba(188,24,136,.05) 45%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
     /* ── Nav ── */
     nav {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 1080px;
-      margin: 0 auto;
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1080px; margin: 0 auto;
       padding: 26px 32px;
       border-bottom: 1px solid var(--border);
     }
 
     .nav-brand {
-      font-size: 1.1rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
+      font-size: 1.1rem; font-weight: 800; letter-spacing: -0.03em;
       background: var(--ig);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       text-decoration: none;
     }
 
     .nav-back {
-      color: var(--muted);
-      font-size: 0.84rem;
-      font-weight: 600;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      color: var(--muted); font-size: 0.84rem; font-weight: 600;
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
       transition: color .15s;
     }
-
     .nav-back:hover { color: var(--text); }
 
-    /* ── Main layout ── */
+    /* ── Layout ── */
     .wrap {
-      position: relative;
-      z-index: 1;
-      max-width: 680px;
-      margin: 0 auto;
+      position: relative; z-index: 1;
+      max-width: 680px; margin: 0 auto;
       padding: 44px 24px 96px;
     }
 
     /* ── Page header ── */
-    .page-header { margin-bottom: 40px; }
+    .page-header { margin-bottom: 32px; }
 
     .page-header h1 {
-      font-size: 1.65rem;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      line-height: 1.1;
+      font-size: 1.65rem; font-weight: 800;
+      letter-spacing: -0.04em; line-height: 1.1;
     }
 
     .page-header h1 span {
       background: var(--ig);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
     .page-header p {
-      color: var(--muted);
-      font-size: 0.9rem;
-      font-weight: 400;
-      line-height: 1.6;
-      margin-top: 8px;
+      color: var(--muted); font-size: 0.9rem; font-weight: 400;
+      line-height: 1.6; margin-top: 8px;
     }
+
+    /* ── Mode switcher ── */
+    .mode-switch {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 4px; gap: 4px;
+      margin-bottom: 32px;
+    }
+
+    .mode-btn {
+      flex: 1; background: none; border: none;
+      border-radius: 10px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit; font-size: 0.88rem; font-weight: 600;
+      padding: 12px 16px;
+      transition: background .15s, color .15s;
+      color: var(--muted);
+    }
+
+    .mode-btn:hover:not(.active) { color: var(--text); }
+
+    .mode-btn.active {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .mode-btn.active .mode-label {
+      background: var(--ig);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .mode-icon { font-size: 1rem; line-height: 1; }
 
     /* ── Section ── */
     .section { margin-bottom: 12px; }
 
     .section-head {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
+      display: flex; align-items: flex-start; gap: 10px;
       margin-bottom: 10px;
     }
 
     .step-num {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 2px 7px;
-      text-transform: uppercase;
-      flex-shrink: 0;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--muted); background: var(--surface);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 2px 7px; text-transform: uppercase;
+      flex-shrink: 0; margin-top: 2px;
     }
 
     .section-label {
-      font-size: 0.84rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.01em;
+      font-size: 0.84rem; font-weight: 700;
+      color: var(--text); letter-spacing: -0.01em;
     }
 
     .section-hint {
-      font-size: 0.8rem;
-      font-weight: 400;
-      color: var(--muted);
-      margin-top: 2px;
+      font-size: 0.8rem; font-weight: 400;
+      color: var(--muted); margin-top: 2px;
     }
 
     /* ── Card ── */
     .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
       transition: border-color .2s;
     }
-
     .card:hover { border-color: var(--border-h); }
 
-    /* ── Textarea ── */
-    textarea {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 0.93rem;
-      font-weight: 400;
-      line-height: 1.7;
-      min-height: 164px;
-      outline: none;
-      padding: 14px 16px;
-      resize: vertical;
+    /* ── Inputs ── */
+    textarea, input[type="text"] {
+      width: 100%; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 10px;
+      color: var(--text); font-family: inherit;
+      font-size: 0.93rem; font-weight: 400;
+      outline: none; padding: 14px 16px;
       transition: border-color .15s, box-shadow .15s;
     }
 
-    textarea::placeholder { color: var(--muted); }
+    textarea { line-height: 1.7; min-height: 164px; resize: vertical; }
 
-    textarea:focus {
+    textarea::placeholder, input[type="text"]::placeholder { color: var(--muted); }
+
+    textarea:focus, input[type="text"]:focus {
       border-color: #dc2743;
       box-shadow: 0 0 0 3px rgba(220,39,67,.12);
     }
@@ -200,44 +186,27 @@
     .platforms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
     .plat {
-      background: var(--surface2);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      color: var(--text);
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      font-family: inherit;
-      font-size: 0.84rem;
-      font-weight: 600;
+      background: var(--surface2); border: 2px solid var(--border);
+      border-radius: 12px; color: var(--text); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      font-family: inherit; font-size: 0.84rem; font-weight: 600;
       padding: 16px 10px 12px;
       transition: border-color .15s, background .15s, transform .15s, box-shadow .15s;
     }
 
     .plat:hover { transform: translateY(-2px); border-color: var(--border-h); }
-
     .plat .ico { font-size: 1.45rem; line-height: 1; }
 
     .plat .star {
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      opacity: 0;
-      transition: opacity .15s;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; opacity: 0; transition: opacity .15s;
       background: var(--ig);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
     .plat.active {
       border: 2px solid transparent;
-      background:
-        linear-gradient(var(--surface2), var(--surface2)) padding-box,
-        var(--ig) border-box;
+      background: linear-gradient(var(--surface2), var(--surface2)) padding-box, var(--ig) border-box;
       box-shadow: 0 0 18px rgba(220,39,67,.18);
       transform: translateY(-2px);
     }
@@ -246,42 +215,22 @@
 
     /* ── Generate button ── */
     .gen-btn {
-      width: 100%;
-      background: var(--ig);
-      border: none;
-      border-radius: 14px;
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-family: inherit;
-      font-size: 1rem;
-      font-weight: 700;
-      padding: 18px;
-      margin-top: 20px;
+      width: 100%; background: var(--ig); border: none; border-radius: 14px;
+      color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-family: inherit; font-size: 1rem; font-weight: 700;
+      padding: 18px; margin-top: 20px;
       position: relative;
       transition: opacity .15s, transform .15s;
     }
 
     .gen-btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: var(--ig);
-      filter: blur(20px);
-      opacity: 0;
-      z-index: -1;
+      content: ''; position: absolute; inset: 0; border-radius: inherit;
+      background: var(--ig); filter: blur(20px); opacity: 0; z-index: -1;
       transition: opacity .3s;
     }
 
-    .gen-btn:hover:not(:disabled) {
-      opacity: .92;
-      transform: translateY(-2px);
-    }
-
+    .gen-btn:hover:not(:disabled) { opacity: .92; transform: translateY(-2px); }
     .gen-btn:hover:not(:disabled)::after { opacity: .5; }
     .gen-btn:active:not(:disabled) { transform: translateY(0); opacity: 1; }
     .gen-btn:disabled { opacity: .4; cursor: not-allowed; }
@@ -289,74 +238,46 @@
     /* ── Spinner ── */
     .spin {
       width: 18px; height: 18px;
-      border: 2.5px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: rot .65s linear infinite;
-      display: none;
-      flex-shrink: 0;
+      border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff;
+      border-radius: 50%; animation: rot .65s linear infinite;
+      display: none; flex-shrink: 0;
     }
-
     @keyframes rot { to { transform: rotate(360deg); } }
 
     /* ── Error ── */
     .err {
-      background: rgba(220,39,67,.08);
-      border: 1px solid rgba(220,39,67,.3);
-      border-radius: 10px;
-      color: #f87171;
-      font-size: 0.875rem;
-      font-weight: 400;
-      line-height: 1.55;
-      margin-top: 14px;
-      padding: 13px 16px;
-      display: none;
+      background: rgba(220,39,67,.08); border: 1px solid rgba(220,39,67,.3);
+      border-radius: 10px; color: #f87171;
+      font-size: 0.875rem; font-weight: 400; line-height: 1.55;
+      margin-top: 14px; padding: 13px 16px; display: none;
     }
 
-    /* ── Results wrapper ── */
+    /* ── Results ── */
     #resultsWrap { margin-top: 40px; display: none; }
     #resultsWrap.show { display: block; }
 
     .results-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 16px;
     }
 
-    .results-title {
-      font-size: 0.84rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.01em;
-    }
+    .results-title { font-size: 0.84rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
 
     .clear-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      color: var(--muted);
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 5px 12px;
-      transition: color .15s, border-color .15s;
+      background: none; border: 1px solid var(--border);
+      border-radius: 7px; color: var(--muted); cursor: pointer;
+      font-family: inherit; font-size: 0.78rem; font-weight: 600;
+      padding: 5px 12px; transition: color .15s, border-color .15s;
     }
-
     .clear-btn:hover { color: var(--text); border-color: var(--border-h); }
 
     /* ── Result card ── */
     .res-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 12px;
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 12px; overflow: hidden;
       animation: fadeUp .28s ease;
       transition: border-color .2s, transform .2s;
     }
-
     .res-card:hover { border-color: var(--border-h); transform: translateY(-1px); }
 
     @keyframes fadeUp {
@@ -365,103 +286,68 @@
     }
 
     .res-card.featured::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: var(--ig);
+      content: ''; display: block; height: 3px; background: var(--ig);
     }
-
     .res-card.featured { border-color: #cc2366; }
     .res-card.featured:hover { border-color: #e6683c; }
 
     .res-card-inner { padding: 18px 20px 16px; }
 
     .res-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-      gap: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px; gap: 12px;
     }
 
     .res-card-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-      font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.85rem; font-weight: 700;
     }
 
     .plat-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      flex-shrink: 0;
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
     }
-
     .res-card[data-p="instagram"] .plat-dot { background: var(--c-ig); }
     .res-card[data-p="linkedin"]  .plat-dot { background: var(--c-li); }
     .res-card[data-p="twitter"]   .plat-dot { background: var(--c-tw); }
 
     .badge {
-      border-radius: 5px;
-      color: #fff;
-      font-size: 0.6rem;
-      font-weight: 800;
-      letter-spacing: 0.07em;
-      padding: 2px 7px;
-      text-transform: uppercase;
-      background: var(--ig);
+      border-radius: 5px; color: #fff; background: var(--ig);
+      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.07em;
+      padding: 2px 7px; text-transform: uppercase;
+    }
+
+    .idea-num {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+      color: var(--muted); background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 5px;
+      padding: 2px 7px; text-transform: uppercase;
     }
 
     .act-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      color: var(--muted);
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 6px 14px;
-      transition: color .15s, border-color .15s, background .15s;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 7px; color: var(--muted); cursor: pointer;
+      font-family: inherit; font-size: 0.78rem; font-weight: 600;
+      padding: 6px 14px; transition: color .15s, border-color .15s, background .15s;
     }
-
-    .act-btn:hover:not(:disabled) {
-      color: var(--text);
-      border-color: var(--border-h);
-      background: #242428;
-    }
-
+    .act-btn:hover:not(:disabled) { color: var(--text); border-color: var(--border-h); background: #242428; }
     .act-btn:disabled { opacity: .35; cursor: not-allowed; }
 
     hr.sep { border: none; border-top: 1px solid var(--border); margin: 0 0 14px; }
 
     .res-body {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-size: 0.91rem;
-      font-weight: 400;
-      line-height: 1.78;
-      min-height: 60px;
-      padding: 14px 16px;
-      white-space: pre-wrap;
-      word-break: break-word;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-size: 0.91rem; font-weight: 400; line-height: 1.78;
+      min-height: 60px; padding: 14px 16px;
+      white-space: pre-wrap; word-break: break-word;
     }
-
     .res-body.card-err {
-      color: #f87171;
-      background: rgba(220,39,67,.07);
-      border-color: rgba(220,39,67,.22);
+      color: #f87171; background: rgba(220,39,67,.07); border-color: rgba(220,39,67,.22);
     }
 
     .res-chars {
-      color: var(--muted);
-      font-size: 0.74rem;
-      font-weight: 400;
-      margin-top: 9px;
-      text-align: right;
+      color: var(--muted); font-size: 0.74rem; font-weight: 400;
+      margin-top: 9px; text-align: right;
     }
 
     /* ── Skeletons ── */
@@ -469,11 +355,8 @@
       background: linear-gradient(90deg, var(--border) 25%, #333338 50%, var(--border) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.4s infinite;
-      border-radius: 5px;
-      height: 13px;
-      margin-bottom: 10px;
+      border-radius: 5px; height: 13px; margin-bottom: 10px;
     }
-
     .skel:last-child { margin-bottom: 0; width: 48%; }
 
     @keyframes shimmer {
@@ -484,7 +367,6 @@
 </head>
 <body>
 
-  <!-- Nav -->
   <nav>
     <a href="/" class="nav-brand">PublicaPost</a>
     <a href="/" class="nav-back">← Inicio</a>
@@ -492,14 +374,25 @@
 
   <div class="wrap">
 
-    <!-- Page header -->
     <div class="page-header">
       <h1>Genera tus <span>posts al instante</span></h1>
-      <p>Pega tu contenido y obtendrás versiones adaptadas para Instagram, LinkedIn y Twitter en segundos.</p>
+      <p>Adapta contenido existente o crea ideas nuevas listas para publicar en cada red.</p>
     </div>
 
-    <!-- Step 1: Contenido -->
-    <div class="section">
+    <!-- Mode switcher -->
+    <div class="mode-switch">
+      <button class="mode-btn active" data-mode="adapt" onclick="switchMode('adapt')">
+        <span class="mode-icon">✦</span>
+        <span class="mode-label">Adaptar contenido</span>
+      </button>
+      <button class="mode-btn" data-mode="ideas" onclick="switchMode('ideas')">
+        <span class="mode-icon">💡</span>
+        <span class="mode-label">Generar ideas</span>
+      </button>
+    </div>
+
+    <!-- Step 01 — Adapt mode: content textarea -->
+    <div id="adaptSection" class="section">
       <div class="section-head">
         <span class="step-num">01</span>
         <div>
@@ -512,13 +405,31 @@
       </div>
     </div>
 
-    <!-- Step 2: Ver primero -->
+    <!-- Step 01 — Ideas mode: business description -->
+    <div id="ideasSection" class="section" style="display:none">
+      <div class="section-head">
+        <span class="step-num">01</span>
+        <div>
+          <div class="section-label">Tu negocio o sector</div>
+          <div class="section-hint">Cuéntanos a qué te dedicas para personalizar las ideas.</div>
+        </div>
+      </div>
+      <div class="card">
+        <input type="text" id="business"
+          placeholder='Ej: "soy pastelera artesanal", "tengo una clínica dental", "vendo ropa sostenible"'>
+      </div>
+    </div>
+
+    <!-- Step 02 — Platform selector (shared, behavior changes by mode) -->
     <div class="section">
       <div class="section-head">
         <span class="step-num">02</span>
         <div>
-          <div class="section-label">Ver primero <span style="font-weight:400;color:var(--muted)">(opcional)</span></div>
-          <div class="section-hint">La red elegida aparecerá destacada en los resultados.</div>
+          <div class="section-label">
+            <span id="platLabel">Ver primero</span>
+            <span id="platOptional" style="font-weight:400;color:var(--muted)"> (opcional)</span>
+          </div>
+          <div class="section-hint" id="platHint">La red elegida aparecerá destacada en los resultados.</div>
         </div>
       </div>
       <div class="card">
@@ -526,23 +437,23 @@
           <button class="plat active" data-p="instagram" onclick="pick(this)">
             <span class="ico">📸</span>
             Instagram
-            <span class="star">★ Primero</span>
+            <span class="star" id="star-instagram">★ Primero</span>
           </button>
           <button class="plat" data-p="linkedin" onclick="pick(this)">
             <span class="ico">💼</span>
             LinkedIn
-            <span class="star">★ Primero</span>
+            <span class="star" id="star-linkedin">★ Primero</span>
           </button>
           <button class="plat" data-p="twitter" onclick="pick(this)">
             <span class="ico">𝕏</span>
             Twitter / X
-            <span class="star">★ Primero</span>
+            <span class="star" id="star-twitter">★ Primero</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Generate -->
+    <!-- Generate button -->
     <button class="gen-btn" id="genBtn" onclick="generate()">
       <span class="spin" id="spin"></span>
       <span id="btnLabel">Generar los 3 posts</span>
@@ -553,7 +464,7 @@
     <!-- Results -->
     <div id="resultsWrap">
       <div class="results-header">
-        <span class="results-title">Resultados</span>
+        <span class="results-title" id="resultsTitle">Resultados</span>
         <button class="clear-btn" onclick="clearAll()">Limpiar</button>
       </div>
       <div id="cardsList"></div>
@@ -563,6 +474,7 @@
 
 <script>
   // ─── State ────────────────────────────────────────────────
+  let mode      = 'adapt';
   let preferred = 'instagram';
 
   const PLATFORMS = ['instagram', 'linkedin', 'twitter'];
@@ -573,8 +485,57 @@
     twitter:   { label: 'Twitter / X 𝕏' },
   };
 
-  // ─── Platform selector ───────────────────────────────────
+  // ─── Mode switch ─────────────────────────────────────────
+  function switchMode(newMode) {
+    if (mode === newMode) return;
+    mode = newMode;
+
+    // Toggle mode buttons
+    document.querySelectorAll('.mode-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.mode === newMode)
+    );
+
+    // Show/hide input sections
+    document.getElementById('adaptSection').style.display = newMode === 'adapt' ? 'block' : 'none';
+    document.getElementById('ideasSection').style.display = newMode === 'ideas' ? 'block' : 'none';
+
+    // Update platform selector labels
+    const isIdeas = newMode === 'ideas';
+    document.getElementById('platLabel').textContent   = isIdeas ? 'Red social' : 'Ver primero';
+    document.getElementById('platOptional').style.display = isIdeas ? 'none' : 'inline';
+    document.getElementById('platHint').textContent    = isIdeas
+      ? 'Elige para qué red quieres las 5 ideas.'
+      : 'La red elegida aparecerá destacada en los resultados.';
+
+    // Update star labels inside platform buttons
+    document.querySelectorAll('.plat .star').forEach(s => {
+      s.textContent = isIdeas ? '✓ Elegida' : '★ Primero';
+    });
+
+    // In ideas mode: ensure a platform is always selected (no deselect)
+    if (isIdeas && !preferred) {
+      const first = document.querySelector('.plat');
+      first.classList.add('active');
+      preferred = first.dataset.p;
+    }
+
+    // Update button
+    document.getElementById('btnLabel').textContent = isIdeas ? 'Generar 5 ideas' : 'Generar los 3 posts';
+
+    clearAll();
+    hideErr();
+  }
+
+  // ─── Platform picker ─────────────────────────────────────
   function pick(btn) {
+    if (mode === 'ideas') {
+      // Single required select — no toggling off
+      document.querySelectorAll('.plat').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      preferred = btn.dataset.p;
+      return;
+    }
+    // Adapt mode: toggle
     const wasActive = btn.classList.contains('active');
     document.querySelectorAll('.plat').forEach(b => b.classList.remove('active'));
     if (!wasActive) {
@@ -589,7 +550,12 @@
   function setLoading(on) {
     document.getElementById('genBtn').disabled = on;
     document.getElementById('spin').style.display = on ? 'block' : 'none';
-    document.getElementById('btnLabel').textContent = on ? 'Generando…' : 'Generar los 3 posts';
+    if (!on) {
+      document.getElementById('btnLabel').textContent =
+        mode === 'ideas' ? 'Generar 5 ideas' : 'Generar los 3 posts';
+    } else {
+      document.getElementById('btnLabel').textContent = 'Generando…';
+    }
   }
 
   function showErr(msg) {
@@ -605,8 +571,39 @@
     document.getElementById('cardsList').innerHTML = '';
   }
 
-  // ─── Skeleton cards ──────────────────────────────────────
-  function renderSkeletons(order) {
+  // ─── Generate (router) ───────────────────────────────────
+  function generate() {
+    if (mode === 'ideas') generateIdeas();
+    else generateAdapt();
+  }
+
+  // ─── Adapt mode ──────────────────────────────────────────
+  async function generateAdapt() {
+    const content = document.getElementById('content').value.trim();
+    hideErr();
+    if (!content)            return showErr('Pega el contenido que quieres adaptar.');
+    if (content.length < 30) return showErr('El contenido es demasiado corto. Añade más texto.');
+
+    setLoading(true);
+    document.getElementById('resultsTitle').textContent = 'Resultados';
+
+    const others = PLATFORMS.filter(p => p !== preferred);
+    const order  = preferred ? [preferred, ...others] : PLATFORMS;
+
+    renderAdaptSkeletons(order);
+
+    let allFailed = true;
+    await Promise.all(order.map(p =>
+      callAPI({ type: 'adapt', platform: p, content })
+        .then(data => { allFailed = false; fillAdaptCard(p, data.text); })
+        .catch(e   => errorCard(`body-${p}`, e.message))
+    ));
+
+    if (allFailed) showErr('No se pudo generar ningún post. Comprueba la configuración del servidor.');
+    setLoading(false);
+  }
+
+  function renderAdaptSkeletons(order) {
     const list = document.getElementById('cardsList');
     list.innerHTML = '';
     order.forEach((p, i) => {
@@ -620,98 +617,136 @@
                 ${META[p].label}
                 ${featured ? '<span class="badge">Destacado</span>' : ''}
               </div>
-              <button class="act-btn" id="copy-${p}" onclick="copyCard('${p}', this)" disabled>Copiar</button>
+              <button class="act-btn" id="copy-adapt-${p}" onclick="copyText('body-${p}', this)" disabled>Copiar</button>
             </div>
             <hr class="sep">
-            <div class="res-body" id="body-${p}">
-              <div class="skel" style="width:88%"></div>
-              <div class="skel" style="width:74%"></div>
-              <div class="skel" style="width:81%"></div>
-              <div class="skel" style="width:48%"></div>
-            </div>
+            <div class="res-body" id="body-${p}">${skelHtml()}</div>
             <div class="res-chars" id="chars-${p}"></div>
           </div>
-        </div>
-      `);
+        </div>`);
     });
-    document.getElementById('resultsWrap').classList.add('show');
-    document.getElementById('resultsWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showResults();
   }
 
-  function fillCard(p, text) {
-    const body    = document.getElementById(`body-${p}`);
-    const chars   = document.getElementById(`chars-${p}`);
-    const copyBtn = document.getElementById(`copy-${p}`);
-    body.innerHTML = '';
-    body.textContent = text;
-    chars.textContent = text.length + ' caracteres';
-    copyBtn.disabled = false;
+  function fillAdaptCard(p, text) {
+    fillBody(`body-${p}`, text);
+    document.getElementById(`chars-${p}`).textContent = text.length + ' caracteres';
+    document.getElementById(`copy-adapt-${p}`).disabled = false;
   }
 
-  function errorCard(p, msg) {
-    const body = document.getElementById(`body-${p}`);
-    body.innerHTML = '';
-    body.classList.add('card-err');
-    body.textContent = '⚠ ' + msg;
-  }
-
-  // ─── API call via Netlify function ───────────────────────
-  async function callAPI(platform, content) {
-    const res = await fetch('/.netlify/functions/generate', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ platform, content }),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      throw new Error(data?.error || `Error ${res.status}`);
-    }
-
-    if (!data.text) throw new Error('Respuesta vacía del servidor.');
-    return data.text;
-  }
-
-  // ─── Generate ────────────────────────────────────────────
-  async function generate() {
-    const content = document.getElementById('content').value.trim();
-
+  // ─── Ideas mode ──────────────────────────────────────────
+  async function generateIdeas() {
+    const business = document.getElementById('business').value.trim();
     hideErr();
-
-    if (!content)            return showErr('Pega el contenido que quieres adaptar.');
-    if (content.length < 30) return showErr('El contenido es demasiado corto. Añade más texto.');
+    if (!business)           return showErr('Describe tu negocio o sector para continuar.');
+    if (business.length < 5) return showErr('Añade un poco más de descripción (al menos unas palabras).');
+    if (!preferred)          return showErr('Elige una red social.');
 
     setLoading(true);
+    document.getElementById('resultsTitle').textContent = `5 ideas para ${META[preferred].label}`;
 
-    const others = PLATFORMS.filter(p => p !== preferred);
-    const order  = preferred ? [preferred, ...others] : PLATFORMS;
+    renderIdeasSkeletons(preferred);
 
-    renderSkeletons(order);
-
-    let allFailed = true;
-    await Promise.all(order.map(p =>
-      callAPI(p, content)
-        .then(text => { allFailed = false; fillCard(p, text); })
-        .catch(e   => errorCard(p, e.message))
-    ));
-
-    if (allFailed) showErr('No se pudo generar ningún post. Comprueba la configuración del servidor.');
+    try {
+      const data = await callAPI({ type: 'ideas', platform: preferred, content: business });
+      fillIdeasCards(data.ideas, preferred);
+    } catch (e) {
+      // Show error in all skeleton cards
+      for (let i = 0; i < 5; i++) errorCard(`idea-body-${i}`, e.message);
+      showErr('No se pudieron generar las ideas. Inténtalo de nuevo.');
+    }
 
     setLoading(false);
   }
 
-  // ─── Copy ────────────────────────────────────────────────
-  function copyCard(p, btn) {
-    const text = document.getElementById(`body-${p}`).textContent;
+  function renderIdeasSkeletons(platform) {
+    const list = document.getElementById('cardsList');
+    list.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      list.insertAdjacentHTML('beforeend', `
+        <div class="res-card" data-p="${platform}" id="idea-card-${i}">
+          <div class="res-card-inner">
+            <div class="res-card-top">
+              <div class="res-card-title">
+                <span class="plat-dot"></span>
+                <span class="idea-num">Idea ${String(i + 1).padStart(2, '0')}</span>
+                ${META[platform].label}
+              </div>
+              <button class="act-btn" id="idea-copy-${i}" onclick="copyText('idea-body-${i}', this)" disabled>Copiar</button>
+            </div>
+            <hr class="sep">
+            <div class="res-body" id="idea-body-${i}">${skelHtml()}</div>
+            <div class="res-chars" id="idea-chars-${i}"></div>
+          </div>
+        </div>`);
+    }
+    showResults();
+  }
+
+  function fillIdeasCards(ideas, platform) {
+    ideas.forEach((text, i) => {
+      if (!document.getElementById(`idea-body-${i}`)) return;
+      fillBody(`idea-body-${i}`, text);
+      document.getElementById(`idea-chars-${i}`).textContent = text.length + ' caracteres';
+      document.getElementById(`idea-copy-${i}`).disabled = false;
+    });
+    // If fewer than 5 came back, hide extra skeletons
+    for (let i = ideas.length; i < 5; i++) {
+      const card = document.getElementById(`idea-card-${i}`);
+      if (card) card.style.display = 'none';
+    }
+  }
+
+  // ─── Shared utils ────────────────────────────────────────
+  function skelHtml() {
+    return `<div class="skel" style="width:88%"></div>
+            <div class="skel" style="width:72%"></div>
+            <div class="skel" style="width:80%"></div>
+            <div class="skel" style="width:48%"></div>`;
+  }
+
+  function fillBody(id, text) {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    el.textContent = text;
+  }
+
+  function errorCard(bodyId, msg) {
+    const el = document.getElementById(bodyId);
+    if (!el) return;
+    el.innerHTML = '';
+    el.classList.add('card-err');
+    el.textContent = '⚠ ' + msg;
+  }
+
+  function showResults() {
+    document.getElementById('resultsWrap').classList.add('show');
+    document.getElementById('resultsWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function copyText(bodyId, btn) {
+    const text = document.getElementById(bodyId).textContent;
     navigator.clipboard.writeText(text).then(() => {
       btn.textContent = '¡Copiado!';
       setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
     });
   }
 
-  // ─── Cmd/Ctrl+Enter ──────────────────────────────────────
-  document.getElementById('content').addEventListener('keydown', e => {
+  // ─── API ─────────────────────────────────────────────────
+  async function callAPI({ type, platform, content }) {
+    const res = await fetch(window.location.origin + '/.netlify/functions/generate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ type, platform, content }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `Error ${res.status}`);
+    return data;
+  }
+
+  // ─── Keyboard shortcut ───────────────────────────────────
+  document.addEventListener('keydown', e => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') generate();
   });
 </script>
