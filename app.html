@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PublicaPost — Herramienta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #09090b;
+      --surface:  #111113;
+      --surface2: #1c1c1f;
+      --border:   #2a2a2e;
+      --border-h: #3a3a3e;
+      --text:     #fafafa;
+      --muted:    #8e8e93;
+      --radius:   14px;
+      --ig:       linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      --c-ig:     #e1306c;
+      --c-li:     #0a66c2;
+      --c-tw:     #1d9bf0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background glow ── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -220px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 600px;
+      background: radial-gradient(ellipse at center,
+        rgba(220,39,67,.10) 0%,
+        rgba(188,24,136,.05) 45%,
+        transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 26px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: var(--ig);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .nav-back {
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .15s;
+    }
+
+    .nav-back:hover { color: var(--text); }
+
+    /* ── Main layout ── */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 44px 24px 96px;
+    }
+
+    /* ── Page header ── */
+    .page-header { margin-bottom: 40px; }
+
+    .page-header h1 {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+    }
+
+    .page-header h1 span {
+      background: var(--ig);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 400;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    /* ── Section ── */
+    .section { margin-bottom: 12px; }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .step-num {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .section-label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .section-hint {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color .2s;
+    }
+
+    .card:hover { border-color: var(--border-h); }
+
+    /* ── Textarea ── */
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.93rem;
+      font-weight: 400;
+      line-height: 1.7;
+      min-height: 164px;
+      outline: none;
+      padding: 14px 16px;
+      resize: vertical;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    textarea::placeholder { color: var(--muted); }
+
+    textarea:focus {
+      border-color: #dc2743;
+      box-shadow: 0 0 0 3px rgba(220,39,67,.12);
+    }
+
+    /* ── Platform selector ── */
+    .platforms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+    .plat {
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 16px 10px 12px;
+      transition: border-color .15s, background .15s, transform .15s, box-shadow .15s;
+    }
+
+    .plat:hover { transform: translateY(-2px); border-color: var(--border-h); }
+
+    .plat .ico { font-size: 1.45rem; line-height: 1; }
+
+    .plat .star {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity .15s;
+      background: var(--ig);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .plat.active {
+      border: 2px solid transparent;
+      background:
+        linear-gradient(var(--surface2), var(--surface2)) padding-box,
+        var(--ig) border-box;
+      box-shadow: 0 0 18px rgba(220,39,67,.18);
+      transform: translateY(-2px);
+    }
+
+    .plat.active .star { opacity: 1; }
+
+    /* ── Generate button ── */
+    .gen-btn {
+      width: 100%;
+      background: var(--ig);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 18px;
+      margin-top: 20px;
+      position: relative;
+      transition: opacity .15s, transform .15s;
+    }
+
+    .gen-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: var(--ig);
+      filter: blur(20px);
+      opacity: 0;
+      z-index: -1;
+      transition: opacity .3s;
+    }
+
+    .gen-btn:hover:not(:disabled) {
+      opacity: .92;
+      transform: translateY(-2px);
+    }
+
+    .gen-btn:hover:not(:disabled)::after { opacity: .5; }
+    .gen-btn:active:not(:disabled) { transform: translateY(0); opacity: 1; }
+    .gen-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── Spinner ── */
+    .spin {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: rot .65s linear infinite;
+      display: none;
+      flex-shrink: 0;
+    }
+
+    @keyframes rot { to { transform: rotate(360deg); } }
+
+    /* ── Error ── */
+    .err {
+      background: rgba(220,39,67,.08);
+      border: 1px solid rgba(220,39,67,.3);
+      border-radius: 10px;
+      color: #f87171;
+      font-size: 0.875rem;
+      font-weight: 400;
+      line-height: 1.55;
+      margin-top: 14px;
+      padding: 13px 16px;
+      display: none;
+    }
+
+    /* ── Results wrapper ── */
+    #resultsWrap { margin-top: 40px; display: none; }
+    #resultsWrap.show { display: block; }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .results-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .clear-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      transition: color .15s, border-color .15s;
+    }
+
+    .clear-btn:hover { color: var(--text); border-color: var(--border-h); }
+
+    /* ── Result card ── */
+    .res-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+      animation: fadeUp .28s ease;
+      transition: border-color .2s, transform .2s;
+    }
+
+    .res-card:hover { border-color: var(--border-h); transform: translateY(-1px); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .res-card.featured::before {
+      content: '';
+      display: block;
+      height: 3px;
+      background: var(--ig);
+    }
+
+    .res-card.featured { border-color: #cc2366; }
+    .res-card.featured:hover { border-color: #e6683c; }
+
+    .res-card-inner { padding: 18px 20px 16px; }
+
+    .res-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+
+    .res-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .plat-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .res-card[data-p="instagram"] .plat-dot { background: var(--c-ig); }
+    .res-card[data-p="linkedin"]  .plat-dot { background: var(--c-li); }
+    .res-card[data-p="twitter"]   .plat-dot { background: var(--c-tw); }
+
+    .badge {
+      border-radius: 5px;
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      padding: 2px 7px;
+      text-transform: uppercase;
+      background: var(--ig);
+    }
+
+    .act-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+
+    .act-btn:hover:not(:disabled) {
+      color: var(--text);
+      border-color: var(--border-h);
+      background: #242428;
+    }
+
+    .act-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    hr.sep { border: none; border-top: 1px solid var(--border); margin: 0 0 14px; }
+
+    .res-body {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.91rem;
+      font-weight: 400;
+      line-height: 1.78;
+      min-height: 60px;
+      padding: 14px 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .res-body.card-err {
+      color: #f87171;
+      background: rgba(220,39,67,.07);
+      border-color: rgba(220,39,67,.22);
+    }
+
+    .res-chars {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 400;
+      margin-top: 9px;
+      text-align: right;
+    }
+
+    /* ── Skeletons ── */
+    .skel {
+      background: linear-gradient(90deg, var(--border) 25%, #333338 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 5px;
+      height: 13px;
+      margin-bottom: 10px;
+    }
+
+    .skel:last-child { margin-bottom: 0; width: 48%; }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="/" class="nav-brand">PublicaPost</a>
+    <a href="/" class="nav-back">← Inicio</a>
+  </nav>
+
+  <div class="wrap">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <h1>Genera tus <span>posts al instante</span></h1>
+      <p>Pega tu contenido y obtendrás versiones adaptadas para Instagram, LinkedIn y Twitter en segundos.</p>
+    </div>
+
+    <!-- Step 1: Contenido -->
+    <div class="section">
+      <div class="section-head">
+        <span class="step-num">01</span>
+        <div>
+          <div class="section-label">Tu contenido</div>
+          <div class="section-hint">Un artículo, unas notas, un correo, una idea…</div>
+        </div>
+      </div>
+      <div class="card">
+        <textarea id="content" placeholder="Pega aquí tu texto. Cuanto más contexto des, mejor será el resultado."></textarea>
+      </div>
+    </div>
+
+    <!-- Step 2: Ver primero -->
+    <div class="section">
+      <div class="section-head">
+        <span class="step-num">02</span>
+        <div>
+          <div class="section-label">Ver primero <span style="font-weight:400;color:var(--muted)">(opcional)</span></div>
+          <div class="section-hint">La red elegida aparecerá destacada en los resultados.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="platforms">
+          <button class="plat active" data-p="instagram" onclick="pick(this)">
+            <span class="ico">📸</span>
+            Instagram
+            <span class="star">★ Primero</span>
+          </button>
+          <button class="plat" data-p="linkedin" onclick="pick(this)">
+            <span class="ico">💼</span>
+            LinkedIn
+            <span class="star">★ Primero</span>
+          </button>
+          <button class="plat" data-p="twitter" onclick="pick(this)">
+            <span class="ico">𝕏</span>
+            Twitter / X
+            <span class="star">★ Primero</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate -->
+    <button class="gen-btn" id="genBtn" onclick="generate()">
+      <span class="spin" id="spin"></span>
+      <span id="btnLabel">Generar los 3 posts</span>
+    </button>
+
+    <div class="err" id="err"></div>
+
+    <!-- Results -->
+    <div id="resultsWrap">
+      <div class="results-header">
+        <span class="results-title">Resultados</span>
+        <button class="clear-btn" onclick="clearAll()">Limpiar</button>
+      </div>
+      <div id="cardsList"></div>
+    </div>
+
+  </div>
+
+<script>
+  // ─── State ────────────────────────────────────────────────
+  let preferred = 'instagram';
+
+  const PLATFORMS = ['instagram', 'linkedin', 'twitter'];
+
+  const META = {
+    instagram: { label: 'Instagram 📸' },
+    linkedin:  { label: 'LinkedIn 💼'  },
+    twitter:   { label: 'Twitter / X 𝕏' },
+  };
+
+  // ─── Platform selector ───────────────────────────────────
+  function pick(btn) {
+    const wasActive = btn.classList.contains('active');
+    document.querySelectorAll('.plat').forEach(b => b.classList.remove('active'));
+    if (!wasActive) {
+      btn.classList.add('active');
+      preferred = btn.dataset.p;
+    } else {
+      preferred = null;
+    }
+  }
+
+  // ─── UI helpers ──────────────────────────────────────────
+  function setLoading(on) {
+    document.getElementById('genBtn').disabled = on;
+    document.getElementById('spin').style.display = on ? 'block' : 'none';
+    document.getElementById('btnLabel').textContent = on ? 'Generando…' : 'Generar los 3 posts';
+  }
+
+  function showErr(msg) {
+    const el = document.getElementById('err');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function hideErr() { document.getElementById('err').style.display = 'none'; }
+
+  function clearAll() {
+    document.getElementById('resultsWrap').classList.remove('show');
+    document.getElementById('cardsList').innerHTML = '';
+  }
+
+  // ─── Skeleton cards ──────────────────────────────────────
+  function renderSkeletons(order) {
+    const list = document.getElementById('cardsList');
+    list.innerHTML = '';
+    order.forEach((p, i) => {
+      const featured = i === 0 && preferred;
+      list.insertAdjacentHTML('beforeend', `
+        <div class="res-card${featured ? ' featured' : ''}" id="card-${p}" data-p="${p}">
+          <div class="res-card-inner">
+            <div class="res-card-top">
+              <div class="res-card-title">
+                <span class="plat-dot"></span>
+                ${META[p].label}
+                ${featured ? '<span class="badge">Destacado</span>' : ''}
+              </div>
+              <button class="act-btn" id="copy-${p}" onclick="copyCard('${p}', this)" disabled>Copiar</button>
+            </div>
+            <hr class="sep">
+            <div class="res-body" id="body-${p}">
+              <div class="skel" style="width:88%"></div>
+              <div class="skel" style="width:74%"></div>
+              <div class="skel" style="width:81%"></div>
+              <div class="skel" style="width:48%"></div>
+            </div>
+            <div class="res-chars" id="chars-${p}"></div>
+          </div>
+        </div>
+      `);
+    });
+    document.getElementById('resultsWrap').classList.add('show');
+    document.getElementById('resultsWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function fillCard(p, text) {
+    const body    = document.getElementById(`body-${p}`);
+    const chars   = document.getElementById(`chars-${p}`);
+    const copyBtn = document.getElementById(`copy-${p}`);
+    body.innerHTML = '';
+    body.textContent = text;
+    chars.textContent = text.length + ' caracteres';
+    copyBtn.disabled = false;
+  }
+
+  function errorCard(p, msg) {
+    const body = document.getElementById(`body-${p}`);
+    body.innerHTML = '';
+    body.classList.add('card-err');
+    body.textContent = '⚠ ' + msg;
+  }
+
+  // ─── API call via Netlify function ───────────────────────
+  async function callAPI(platform, content) {
+    const res = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ platform, content }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data?.error || `Error ${res.status}`);
+    }
+
+    if (!data.text) throw new Error('Respuesta vacía del servidor.');
+    return data.text;
+  }
+
+  // ─── Generate ────────────────────────────────────────────
+  async function generate() {
+    const content = document.getElementById('content').value.trim();
+
+    hideErr();
+
+    if (!content)            return showErr('Pega el contenido que quieres adaptar.');
+    if (content.length < 30) return showErr('El contenido es demasiado corto. Añade más texto.');
+
+    setLoading(true);
+
+    const others = PLATFORMS.filter(p => p !== preferred);
+    const order  = preferred ? [preferred, ...others] : PLATFORMS;
+
+    renderSkeletons(order);
+
+    let allFailed = true;
+    await Promise.all(order.map(p =>
+      callAPI(p, content)
+        .then(text => { allFailed = false; fillCard(p, text); })
+        .catch(e   => errorCard(p, e.message))
+    ));
+
+    if (allFailed) showErr('No se pudo generar ningún post. Comprueba la configuración del servidor.');
+
+    setLoading(false);
+  }
+
+  // ─── Copy ────────────────────────────────────────────────
+  function copyCard(p, btn) {
+    const text = document.getElementById(`body-${p}`).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '¡Copiado!';
+      setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+    });
+  }
+
+  // ─── Cmd/Ctrl+Enter ──────────────────────────────────────
+  document.getElementById('content').addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') generate();
+  });
+</script>
+</body>
+</html>
