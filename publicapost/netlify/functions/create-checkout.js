@@ -1,8 +1,9 @@
-// Calls the Stripe REST API directly — no npm packages needed.
+// Uses built-in https module — works on any Node.js version, no npm needed.
+const https = require('https');
 
 const VALID_PRICES = new Set([
-  'price_1Te0DbEHGpx523xpOxmBBi4e', // Básico
-  'price_1Te0FzEHGpx523xpxs5xqe4O', // Pro
+  'price_1Te0DbEHGpx523xpOxmBBi4e',
+  'price_1Te0FzEHGpx523xpxs5xqe4O',
 ]);
 
 const HEADERS = {
@@ -12,18 +13,33 @@ const HEADERS = {
   'Content-Type':                 'application/json',
 };
 
-// Stripe requires application/x-www-form-urlencoded with bracket notation for nested keys
-function encodeStripeParams(obj, prefix) {
-  return Object.entries(obj)
-    .filter(([, v]) => v !== undefined && v !== null)
-    .flatMap(([k, v]) => {
-      const key = prefix ? `${prefix}[${k}]` : k;
-      if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
-        return encodeStripeParams(v, key).split('&');
+function httpsPost(hostname, path, authToken, formBody) {
+  return new Promise((resolve, reject) => {
+    const bodyBuf = Buffer.from(formBody, 'utf8');
+    const req = https.request(
+      {
+        hostname,
+        path,
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type':  'application/x-www-form-urlencoded',
+          'Content-Length': bodyBuf.length,
+        },
+      },
+      (res) => {
+        let raw = '';
+        res.on('data', chunk => { raw += chunk; });
+        res.on('end', () => {
+          try { resolve({ status: res.statusCode, body: JSON.parse(raw) }); }
+          catch { reject(new Error(`Non-JSON response (${res.statusCode}): ${raw}`)); }
+        });
       }
-      return [`${encodeURIComponent(key)}=${encodeURIComponent(v)}`];
-    })
-    .join('&');
+    );
+    req.on('error', reject);
+    req.write(bodyBuf);
+    req.end();
+  });
 }
 
 exports.handler = async (event) => {
@@ -33,7 +49,10 @@ exports.handler = async (event) => {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) {
     console.error('STRIPE_SECRET_KEY is not set');
-    return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: 'Stripe no configurado: añade STRIPE_SECRET_KEY en las variables de entorno de Netlify.' }) };
+    return {
+      statusCode: 500, headers: HEADERS,
+      body: JSON.stringify({ error: 'STRIPE_SECRET_KEY no está configurada en las variables de entorno de Netlify.' }),
+    };
   }
 
   let priceId, userId, userEmail;
@@ -42,7 +61,7 @@ exports.handler = async (event) => {
       ? Buffer.from(event.body, 'base64').toString('utf8')
       : (event.body ?? '{}');
     ({ priceId, userId, userEmail } = JSON.parse(raw));
-  } catch {
+  } catch (e) {
     return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'JSON inválido' }) };
   }
 
@@ -58,41 +77,38 @@ exports.handler = async (event) => {
     ? `http://${host}`
     : (process.env.URL || `https://${host}`);
 
-  const params = {
-    mode:                  'subscription',
-    'payment_method_types[0]': 'card',
-    'line_items[0][price]':    priceId,
-    'line_items[0][quantity]': '1',
-    client_reference_id:   userId,
-    locale:                'es',
-    success_url:           `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url:            `${origin}/pricing.html`,
-    'subscription_data[metadata][userId]': userId,
-  };
-  if (userEmail) params.customer_email = userEmail;
+  // Build form body for Stripe
+  const params = new URLSearchParams();
+  params.append('mode',                          'subscription');
+  params.append('payment_method_types[0]',       'card');
+  params.append('line_items[0][price]',          priceId);
+  params.append('line_items[0][quantity]',       '1');
+  params.append('client_reference_id',           userId);
+  params.append('locale',                        'es');
+  params.append('success_url',                   `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`);
+  params.append('cancel_url',                    `${origin}/pricing.html`);
+  params.append('subscription_data[metadata][userId]', userId);
+  if (userEmail) params.append('customer_email', userEmail);
 
   try {
-    const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-      method:  'POST',
-      headers: {
-        'Authorization': `Bearer ${secretKey}`,
-        'Content-Type':  'application/x-www-form-urlencoded',
-      },
-      body: Object.entries(params)
-        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-        .join('&'),
-    });
+    const result = await httpsPost(
+      'api.stripe.com',
+      '/v1/checkout/sessions',
+      secretKey,
+      params.toString()
+    );
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error('Stripe API error:', JSON.stringify(data.error));
-      return { statusCode: res.status, headers: HEADERS, body: JSON.stringify({ error: data.error?.message || `Stripe error ${res.status}` }) };
+    if (result.status >= 400) {
+      console.error('Stripe error response:', JSON.stringify(result.body));
+      return {
+        statusCode: result.status, headers: HEADERS,
+        body: JSON.stringify({ error: result.body?.error?.message || `Stripe error ${result.status}` }),
+      };
     }
 
-    return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ url: data.url }) };
+    return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ url: result.body.url }) };
   } catch (e) {
-    console.error('create-checkout fetch error:', e.message);
+    console.error('create-checkout error:', e.message);
     return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: e.message }) };
   }
 };
