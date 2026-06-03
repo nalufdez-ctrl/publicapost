@@ -560,6 +560,98 @@
       font-size: 0.76rem; color: var(--muted);
       margin-top: 16px;
     }
+
+    /* ── Calendar mode ── */
+    .cal-nets {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+
+    .cal-net {
+      background: var(--surface2); border: 2px solid var(--border);
+      border-radius: 999px; color: var(--muted); cursor: pointer;
+      font-family: inherit; font-size: 0.83rem; font-weight: 600;
+      padding: 9px 16px; display: inline-flex; align-items: center; gap: 6px;
+      transition: border-color .15s, color .15s;
+    }
+    .cal-net:hover { border-color: var(--border-h); color: var(--text); }
+    .cal-net.active {
+      border: 2px solid transparent;
+      background: linear-gradient(var(--surface2), var(--surface2)) padding-box, var(--ig) border-box;
+      color: var(--text);
+    }
+
+    #calResultsWrap { margin-top: 40px; display: none; }
+    #calResultsWrap.show { display: block; }
+
+    .cal-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+    .cal-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      animation: fadeUp .28s ease;
+      transition: border-color .2s, transform .2s;
+    }
+    .cal-card:hover { border-color: var(--border-h); transform: translateY(-1px); }
+
+    .cal-card-top {
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 20px; border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .cal-day-num {
+      font-size: 1.35rem; font-weight: 800; letter-spacing: -0.04em;
+      color: var(--text); line-height: 1; min-width: 28px;
+    }
+
+    .cal-day-name {
+      font-size: 0.9rem; font-weight: 700; color: var(--text); flex: 1;
+    }
+
+    .cal-net-badge {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; padding: 4px 11px;
+      border-radius: 999px; color: #fff; white-space: nowrap;
+    }
+
+    .cal-time-badge {
+      font-size: 0.78rem; font-weight: 600; color: var(--muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 3px 9px; white-space: nowrap;
+    }
+
+    .cal-card-body { padding: 14px 20px 16px; }
+
+    .cal-topic {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+    }
+
+    .cal-post {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-size: 0.88rem; line-height: 1.75;
+      padding: 13px 15px; white-space: pre-wrap; word-break: break-word;
+      max-height: 120px; overflow: hidden;
+      -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+    }
+    .cal-post.expanded {
+      max-height: none;
+      -webkit-mask-image: none; mask-image: none;
+    }
+
+    .cal-card-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 10px;
+    }
+
+    .cal-expand-btn {
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: 0.78rem; font-weight: 600;
+      color: var(--muted); padding: 0; transition: color .15s;
+    }
+    .cal-expand-btn:hover { color: var(--text); }
   </style>
 </head>
 <body>
@@ -586,11 +678,15 @@
     <div class="mode-switch">
       <button class="mode-btn active" data-mode="adapt" onclick="switchMode('adapt')">
         <span class="mode-icon">✦</span>
-        <span class="mode-label">Adaptar contenido</span>
+        <span class="mode-label">Adaptar</span>
       </button>
       <button class="mode-btn" data-mode="ideas" onclick="switchMode('ideas')">
         <span class="mode-icon">💡</span>
-        <span class="mode-label">Generar ideas</span>
+        <span class="mode-label">Ideas</span>
+      </button>
+      <button class="mode-btn" data-mode="calendar" onclick="switchMode('calendar')">
+        <span class="mode-icon">📅</span>
+        <span class="mode-label">Calendario</span>
       </button>
     </div>
 
@@ -623,6 +719,37 @@
       </div>
     </div>
 
+    <!-- Step 01 — Calendar mode -->
+    <div id="calSection" class="section" style="display:none">
+      <div class="section-head">
+        <span class="step-num">01</span>
+        <div>
+          <div class="section-label">Tu negocio o sector</div>
+          <div class="section-hint">Cuéntanos a qué te dedicas para personalizar el calendario.</div>
+        </div>
+      </div>
+      <div class="card">
+        <input type="text" id="calBusiness"
+          placeholder='Ej: "soy fotógrafa de bodas", "tengo una clínica dental", "vendo ropa sostenible"'>
+      </div>
+      <div class="section-head" style="margin-top:16px">
+        <span class="step-num">02</span>
+        <div>
+          <div class="section-label">Redes sociales</div>
+          <div class="section-hint">Elige las que usas — el calendario las rotará de forma equilibrada.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cal-nets">
+          <button class="cal-net active" data-n="instagram" onclick="toggleCalNet(this)">📸 Instagram</button>
+          <button class="cal-net active" data-n="linkedin"  onclick="toggleCalNet(this)">💼 LinkedIn</button>
+          <button class="cal-net active" data-n="twitter"   onclick="toggleCalNet(this)">𝕏 X</button>
+          <button class="cal-net active" data-n="facebook"  onclick="toggleCalNet(this)">👥 Facebook</button>
+          <button class="cal-net active" data-n="tiktok"    onclick="toggleCalNet(this)">🎵 TikTok</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Step 02 — Tone selector -->
     <div class="section">
       <div class="section-head">
@@ -643,7 +770,7 @@
     </div>
 
     <!-- Step 03 — Platform selector -->
-    <div class="section">
+    <div class="section" id="platSection">
       <div class="section-head">
         <span class="step-num">03</span>
         <div>
@@ -695,6 +822,16 @@
         <button class="clear-btn" onclick="clearAll()">Limpiar</button>
       </div>
       <div id="cardsList"></div>
+    </div>
+
+    <!-- Calendar results -->
+    <div id="calResultsWrap">
+      <div class="results-header">
+        <span class="results-title">Calendario semanal</span>
+        <button class="clear-btn" onclick="clearCalResults()">Limpiar</button>
+      </div>
+      <div class="err" id="calErr"></div>
+      <div class="cal-grid" id="calGrid"></div>
     </div>
 
     <!-- History -->
@@ -821,28 +958,38 @@
       b.classList.toggle('active', b.dataset.mode === newMode)
     );
 
-    document.getElementById('adaptSection').style.display = newMode === 'adapt' ? 'block' : 'none';
-    document.getElementById('ideasSection').style.display = newMode === 'ideas' ? 'block' : 'none';
+    const isCalendar = newMode === 'calendar';
+    const isIdeas    = newMode === 'ideas';
 
-    const isIdeas = newMode === 'ideas';
-    document.getElementById('platLabel').textContent      = isIdeas ? 'Red social' : 'Ver primero';
-    document.getElementById('platOptional').style.display = isIdeas ? 'none' : 'inline';
-    document.getElementById('platHint').textContent       = isIdeas
-      ? 'Elige para qué red quieres las 5 ideas.'
-      : 'La red elegida aparecerá destacada en los resultados.';
+    document.getElementById('adaptSection').style.display  = newMode === 'adapt' ? 'block' : 'none';
+    document.getElementById('ideasSection').style.display  = isIdeas    ? 'block' : 'none';
+    document.getElementById('calSection').style.display    = isCalendar ? 'block' : 'none';
+    document.getElementById('platSection').style.display   = isCalendar ? 'none'  : 'block';
 
-    document.querySelectorAll('.plat .star').forEach(s => {
-      s.textContent = isIdeas ? '✓ Elegida' : '★ Primero';
-    });
+    if (!isCalendar) {
+      document.getElementById('platLabel').textContent      = isIdeas ? 'Red social' : 'Ver primero';
+      document.getElementById('platOptional').style.display = isIdeas ? 'none' : 'inline';
+      document.getElementById('platHint').textContent       = isIdeas
+        ? 'Elige para qué red quieres las 5 ideas.'
+        : 'La red elegida aparecerá destacada en los resultados.';
 
-    if (isIdeas && !preferred) {
-      const first = document.querySelector('.plat');
-      first.classList.add('active');
-      preferred = first.dataset.p;
+      document.querySelectorAll('.plat .star').forEach(s => {
+        s.textContent = isIdeas ? '✓ Elegida' : '★ Primero';
+      });
+
+      if (isIdeas && !preferred) {
+        const first = document.querySelector('.plat');
+        first.classList.add('active');
+        preferred = first.dataset.p;
+      }
     }
 
-    document.getElementById('btnLabel').textContent = isIdeas ? 'Generar 5 ideas' : 'Generar los 5 posts';
+    document.getElementById('btnLabel').textContent = isCalendar
+      ? 'Generar calendario semanal'
+      : isIdeas ? 'Generar 5 ideas' : 'Generar los 5 posts';
+
     clearAll();
+    clearCalResults();
     hideErr();
   }
 
@@ -871,9 +1018,13 @@
   function setLoading(on) {
     document.getElementById('genBtn').disabled = on;
     document.getElementById('spin').style.display = on ? 'block' : 'none';
-    document.getElementById('btnLabel').textContent = on
-      ? 'Generando…'
-      : (mode === 'ideas' ? 'Generar 5 ideas' : 'Generar los 5 posts');
+    if (!on) {
+      document.getElementById('btnLabel').textContent = mode === 'calendar'
+        ? 'Generar calendario semanal'
+        : mode === 'ideas' ? 'Generar 5 ideas' : 'Generar los 5 posts';
+    } else {
+      document.getElementById('btnLabel').textContent = 'Generando…';
+    }
   }
 
   function showErr(msg) {
@@ -893,7 +1044,8 @@
       if (getUses() >= FREE_LIMIT) { showUpgradeModal(); return; }
       incrementUses();
     }
-    if (mode === 'ideas') generateIdeas();
+    if (mode === 'calendar') generateCalendar();
+    else if (mode === 'ideas') generateIdeas();
     else generateAdapt();
   }
 
@@ -1064,6 +1216,134 @@
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data?.error || `Error ${res.status}`);
     return data;
+  }
+
+  // ─── Calendar ────────────────────────────────────────────
+  const CAL_NET_COLORS = {
+    instagram: '#e1306c', linkedin: '#0a66c2',
+    twitter: '#1d9bf0', facebook: '#1877f2', tiktok: '#ff2d55',
+  };
+  const CAL_NET_LABELS = {
+    instagram: 'Instagram', linkedin: 'LinkedIn',
+    twitter: 'X', facebook: 'Facebook', tiktok: 'TikTok',
+  };
+  const CAL_NET_ICONS = {
+    instagram: '📸', linkedin: '💼', twitter: '𝕏', facebook: '👥', tiktok: '🎵',
+  };
+
+  function toggleCalNet(btn) {
+    const active = document.querySelectorAll('.cal-net.active');
+    if (btn.classList.contains('active') && active.length === 1) return;
+    btn.classList.toggle('active');
+  }
+
+  function clearCalResults() {
+    document.getElementById('calResultsWrap').classList.remove('show');
+    document.getElementById('calGrid').innerHTML = '';
+    hideCalErr();
+  }
+
+  function showCalErr(msg) {
+    const el = document.getElementById('calErr');
+    el.textContent = msg; el.style.display = 'block';
+  }
+  function hideCalErr() { document.getElementById('calErr').style.display = 'none'; }
+
+  function renderCalSkeleton() {
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    const days = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+    days.forEach((d, i) => {
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="cal-card">
+          <div class="cal-card-top">
+            <div class="cal-day-num" style="opacity:.25">${String(i+1).padStart(2,'0')}</div>
+            <div class="cal-day-name" style="opacity:.25">${d}</div>
+            <div class="skel" style="width:72px;height:22px;border-radius:999px;flex-shrink:0"></div>
+            <div class="skel" style="width:52px;height:22px;border-radius:6px;flex-shrink:0"></div>
+          </div>
+          <div class="cal-card-body">
+            <div class="skel" style="width:38%;height:10px;margin-bottom:12px"></div>
+            <div class="skel" style="width:94%"></div>
+            <div class="skel" style="width:80%"></div>
+            <div class="skel" style="width:87%"></div>
+            <div class="skel" style="width:55%"></div>
+          </div>
+        </div>`);
+    });
+    document.getElementById('calResultsWrap').classList.add('show');
+    document.getElementById('calResultsWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderCalendar(days) {
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    days.forEach((day, i) => {
+      const net   = day.network || 'instagram';
+      const color = CAL_NET_COLORS[net] || '#666';
+      const label = CAL_NET_LABELS[net] || net;
+      const icon  = CAL_NET_ICONS[net]  || '';
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="cal-card">
+          <div class="cal-card-top">
+            <div class="cal-day-num">${String(i+1).padStart(2,'0')}</div>
+            <div class="cal-day-name">${escHtml(day.day)}</div>
+            <span class="cal-net-badge" style="background:${color}">${icon} ${escHtml(label)}</span>
+            <span class="cal-time-badge">🕐 ${escHtml(day.time || '')}</span>
+          </div>
+          <div class="cal-card-body">
+            <div class="cal-topic">${escHtml(day.topic || '')}</div>
+            <div class="cal-post" id="calpost-${i}">${escHtml(day.post || '')}</div>
+            <div class="cal-card-footer">
+              <button class="cal-expand-btn" id="calexp-${i}" onclick="toggleCalPost(${i}, this)">Ver más ↓</button>
+              <button class="act-btn" onclick="copyCalPost(${i})">Copiar</button>
+            </div>
+          </div>
+        </div>`);
+    });
+  }
+
+  function toggleCalPost(i, btn) {
+    const el = document.getElementById(`calpost-${i}`);
+    const expanded = el.classList.toggle('expanded');
+    btn.textContent = expanded ? 'Ver menos ↑' : 'Ver más ↓';
+  }
+
+  function copyCalPost(i) {
+    const el = document.getElementById(`calpost-${i}`);
+    if (!el) return;
+    navigator.clipboard.writeText(el.textContent).then(() => {
+      const btns = el.closest('.cal-card').querySelectorAll('.act-btn');
+      btns.forEach(b => { b.textContent = '¡Copiado!'; setTimeout(() => { b.textContent = 'Copiar'; }, 2000); });
+    });
+  }
+
+  async function generateCalendar() {
+    const business = document.getElementById('calBusiness').value.trim();
+    const networks = [...document.querySelectorAll('.cal-net.active')].map(b => b.dataset.n);
+
+    hideCalErr();
+    if (!business) return showCalErr('Describe tu negocio o sector para continuar.');
+    if (networks.length === 0) return showCalErr('Selecciona al menos una red social.');
+
+    setLoading(true);
+    renderCalSkeleton();
+
+    try {
+      const res  = await fetch('/.netlify/functions/generate', {
+        method:  'POST',
+        headers: { 'content-type': 'application/json' },
+        body:    JSON.stringify({ type: 'calendar', business, networks, tone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `Error ${res.status}`);
+      renderCalendar(data.days);
+    } catch (e) {
+      showCalErr(e.message);
+      document.getElementById('calGrid').innerHTML = '';
+    }
+
+    setLoading(false);
   }
 
   // ─── History ─────────────────────────────────────────────
