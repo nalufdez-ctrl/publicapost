@@ -1252,22 +1252,24 @@
   function renderCalSkeleton() {
     const grid = document.getElementById('calGrid');
     grid.innerHTML = '';
-    const days = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-    days.forEach((d, i) => {
+    const dayNames = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+    dayNames.forEach((d, i) => {
       grid.insertAdjacentHTML('beforeend', `
-        <div class="cal-card">
-          <div class="cal-card-top">
+        <div class="cal-card" id="cal-card-${i}">
+          <div class="cal-card-top" id="cal-top-${i}">
             <div class="cal-day-num" style="opacity:.25">${String(i+1).padStart(2,'0')}</div>
             <div class="cal-day-name" style="opacity:.25">${d}</div>
             <div class="skel" style="width:72px;height:22px;border-radius:999px;flex-shrink:0"></div>
             <div class="skel" style="width:52px;height:22px;border-radius:6px;flex-shrink:0"></div>
           </div>
           <div class="cal-card-body">
-            <div class="skel" style="width:38%;height:10px;margin-bottom:12px"></div>
-            <div class="skel" style="width:94%"></div>
-            <div class="skel" style="width:80%"></div>
-            <div class="skel" style="width:87%"></div>
-            <div class="skel" style="width:55%"></div>
+            <div class="skel" style="width:38%;height:10px;margin-bottom:12px" id="cal-topic-skel-${i}"></div>
+            <div id="cal-post-wrap-${i}">
+              <div class="skel" style="width:94%"></div>
+              <div class="skel" style="width:80%"></div>
+              <div class="skel" style="width:87%"></div>
+              <div class="skel" style="width:55%"></div>
+            </div>
           </div>
         </div>`);
     });
@@ -1275,32 +1277,35 @@
     document.getElementById('calResultsWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function renderCalendar(days) {
-    const grid = document.getElementById('calGrid');
-    grid.innerHTML = '';
-    days.forEach((day, i) => {
-      const net   = day.network || 'instagram';
-      const color = CAL_NET_COLORS[net] || '#666';
-      const label = CAL_NET_LABELS[net] || net;
-      const icon  = CAL_NET_ICONS[net]  || '';
-      grid.insertAdjacentHTML('beforeend', `
-        <div class="cal-card">
-          <div class="cal-card-top">
-            <div class="cal-day-num">${String(i+1).padStart(2,'0')}</div>
-            <div class="cal-day-name">${escHtml(day.day)}</div>
-            <span class="cal-net-badge" style="background:${color}">${icon} ${escHtml(label)}</span>
-            <span class="cal-time-badge">🕐 ${escHtml(day.time || '')}</span>
-          </div>
-          <div class="cal-card-body">
-            <div class="cal-topic">${escHtml(day.topic || '')}</div>
-            <div class="cal-post" id="calpost-${i}">${escHtml(day.post || '')}</div>
-            <div class="cal-card-footer">
-              <button class="cal-expand-btn" id="calexp-${i}" onclick="toggleCalPost(${i}, this)">Ver más ↓</button>
-              <button class="act-btn" onclick="copyCalPost(${i})">Copiar</button>
-            </div>
-          </div>
-        </div>`);
-    });
+  function fillCalCardHeader(i, day) {
+    const net   = day.network || 'instagram';
+    const color = CAL_NET_COLORS[net] || '#666';
+    const label = CAL_NET_LABELS[net] || net;
+    const icon  = CAL_NET_ICONS[net]  || '';
+    document.getElementById(`cal-top-${i}`).innerHTML = `
+      <div class="cal-day-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="cal-day-name">${escHtml(day.day)}</div>
+      <span class="cal-net-badge" style="background:${color}">${icon} ${escHtml(label)}</span>
+      <span class="cal-time-badge">🕐 ${escHtml(day.time || '')}</span>`;
+    const topicSkel = document.getElementById(`cal-topic-skel-${i}`);
+    if (topicSkel) {
+      topicSkel.outerHTML = `<div class="cal-topic" id="cal-topic-${i}">${escHtml(day.topic || '')}</div>`;
+    }
+  }
+
+  function fillCalPost(i, text, errMsg) {
+    const wrap = document.getElementById(`cal-post-wrap-${i}`);
+    if (!wrap) return;
+    if (errMsg) {
+      wrap.innerHTML = `<div class="res-body card-err">⚠ ${escHtml(errMsg)}</div>`;
+      return;
+    }
+    wrap.innerHTML = `
+      <div class="cal-post" id="calpost-${i}">${escHtml(text)}</div>
+      <div class="cal-card-footer">
+        <button class="cal-expand-btn" id="calexp-${i}" onclick="toggleCalPost(${i}, this)">Ver más ↓</button>
+        <button class="act-btn" onclick="copyCalPost(${i})">Copiar</button>
+      </div>`;
   }
 
   function toggleCalPost(i, btn) {
@@ -1329,19 +1334,37 @@
     setLoading(true);
     renderCalSkeleton();
 
+    // Step 1: get the 7-day plan (fast, small JSON)
+    let plan;
     try {
       const res  = await fetch('/.netlify/functions/generate', {
         method:  'POST',
         headers: { 'content-type': 'application/json' },
-        body:    JSON.stringify({ type: 'calendar', business, networks, tone }),
+        body:    JSON.stringify({ type: 'calendar-plan', business, networks, tone }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || `Error ${res.status}`);
-      renderCalendar(data.days);
+      plan = data.days;
     } catch (e) {
       showCalErr(e.message);
-      document.getElementById('calGrid').innerHTML = '';
+      setLoading(false);
+      return;
     }
+
+    // Fill in headers while posts load
+    plan.forEach((day, i) => fillCalCardHeader(i, day));
+
+    // Step 2: generate each post in parallel (reuses existing prompts, fast)
+    await Promise.all(plan.map((day, i) =>
+      fetch('/.netlify/functions/generate', {
+        method:  'POST',
+        headers: { 'content-type': 'application/json' },
+        body:    JSON.stringify({ type: 'calendar-post', platform: day.network, business, content: day.topic, tone }),
+      })
+      .then(r => r.json().catch(() => ({})))
+      .then(data => fillCalPost(i, data.text || '', data.error && !data.text ? data.error : null))
+      .catch(e => fillCalPost(i, '', e.message))
+    ));
 
     setLoading(false);
   }
