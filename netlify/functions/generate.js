@@ -165,6 +165,26 @@ FORMATO: separa cada post con una línea que contenga únicamente: ---FIN---
 Sin numeración, sin títulos, sin explicaciones previas. Solo los 5 posts separados por ---FIN---`,
 };
 
+// ─── Prompt: calendario semanal ──────────────────────────────────────────────
+
+const CALENDAR_PROMPT = `Eres un experto en estrategia de contenido para redes sociales. El usuario te dará la descripción de su negocio y las redes que utiliza.
+
+Tu tarea: crear un plan de contenido para exactamente 7 días (Lunes a Domingo). Para cada día:
+- Elige la red social más adecuada para ese tipo de contenido ese día
+- Distribuye las redes de forma equilibrada a lo largo de la semana
+- Asigna el mejor horario de publicación para esa red (basado en datos reales de engagement)
+- Escribe el texto completo del post, completamente listo para publicar, adaptado al formato nativo de esa red
+- Varía los temas: consejos del sector, detrás de las cámaras, engagement, novedades, inspiración, storytelling, preguntas a la audiencia
+
+RESPONDE ÚNICAMENTE con un array JSON válido con exactamente 7 objetos. Sin texto antes ni después. Sin bloques de código markdown. Solo el array JSON puro.
+
+Estructura exacta de cada objeto:
+{"day":"Lunes","network":"instagram","time":"18:00","topic":"resumen del tema en 4-6 palabras","post":"texto completo del post listo para publicar"}
+
+Días en orden: Lunes, Martes, Miércoles, Jueves, Viernes, Sábado, Domingo.
+Valores válidos para "network": instagram, linkedin, twitter, facebook, tiktok.
+Idioma de los posts: español siempre.`;
+
 // ─── Shared ───────────────────────────────────────────────────────────────────
 
 const META = {
@@ -193,22 +213,29 @@ exports.handler = async (event) => {
     return { statusCode: 405, headers: HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  let type, platform, content, tone;
+  let type, platform, content, tone, business, networks;
   try {
-    ({ type = 'adapt', platform, content, tone = 'profesional' } = JSON.parse(event.body ?? '{}'));
+    ({ type = 'adapt', platform, content, tone = 'profesional', business, networks } = JSON.parse(event.body ?? '{}'));
   } catch {
     return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'JSON inválido' }) };
   }
 
-  if (!['adapt', 'ideas'].includes(type)) {
+  if (!['adapt', 'ideas', 'calendar'].includes(type)) {
     return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Tipo de solicitud no válido' }) };
   }
 
-  if (!platform || !(type === 'adapt' ? PROMPTS : IDEAS_PROMPTS)[platform]) {
+  if (type !== 'calendar' && (!platform || !(type === 'adapt' ? PROMPTS : IDEAS_PROMPTS)[platform])) {
     return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Plataforma no válida' }) };
   }
 
-  if (!content || (type === 'adapt' && content.trim().length < 30)) {
+  if (type === 'calendar') {
+    if (!business || business.trim().length < 3) {
+      return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Describe tu negocio para continuar' }) };
+    }
+    if (!Array.isArray(networks) || networks.length === 0) {
+      return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Selecciona al menos una red social' }) };
+    }
+  } else if (!content || (type === 'adapt' && content.trim().length < 30)) {
     return {
       statusCode: 400,
       headers: HEADERS,
@@ -221,13 +248,21 @@ exports.handler = async (event) => {
     return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: 'API key no configurada en el servidor' }) };
   }
 
-  const systemPrompt    = type === 'adapt' ? PROMPTS[platform] : IDEAS_PROMPTS[platform];
-  const toneModifier    = TONE_MODIFIERS[tone] || TONE_MODIFIERS.profesional;
-  const fullSystemPrompt = systemPrompt + toneModifier;
+  const toneModifier = TONE_MODIFIERS[tone] || TONE_MODIFIERS.profesional;
+  let fullSystemPrompt, userMessage;
 
-  const userMessage = type === 'adapt'
-    ? `Adapta el siguiente contenido para ${META[platform]}:\n\n${content.trim()}`
-    : `Genera 5 ideas de posts para ${META[platform]}. Mi negocio: ${content.trim()}`;
+  if (type === 'calendar') {
+    const validNets = ['instagram', 'linkedin', 'twitter', 'facebook', 'tiktok'];
+    const netList   = networks.filter(n => validNets.includes(n)).join(', ');
+    fullSystemPrompt = CALENDAR_PROMPT + toneModifier;
+    userMessage      = `Mi negocio: ${business.trim()}\nRedes que uso: ${netList}`;
+  } else {
+    const systemPrompt = type === 'adapt' ? PROMPTS[platform] : IDEAS_PROMPTS[platform];
+    fullSystemPrompt   = systemPrompt + toneModifier;
+    userMessage        = type === 'adapt'
+      ? `Adapta el siguiente contenido para ${META[platform]}:\n\n${content.trim()}`
+      : `Genera 5 ideas de posts para ${META[platform]}. Mi negocio: ${content.trim()}`;
+  }
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -239,7 +274,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model:      'claude-sonnet-4-6',
-        max_tokens: type === 'ideas' ? 3000 : 512,
+        max_tokens: type === 'calendar' ? 4000 : type === 'ideas' ? 3000 : 512,
         system:     fullSystemPrompt,
         messages: [{ role: 'user', content: userMessage }],
       }),
@@ -256,6 +291,20 @@ exports.handler = async (event) => {
 
     if (!text) {
       return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: 'Respuesta vacía de la API' }) };
+    }
+
+    if (type === 'calendar') {
+      try {
+        let jsonStr = text.trim();
+        if (jsonStr.startsWith('```')) {
+          jsonStr = jsonStr.replace(/^```[a-z]*\n?/, '').replace(/```$/, '').trim();
+        }
+        const days = JSON.parse(jsonStr);
+        if (!Array.isArray(days) || days.length === 0) throw new Error('invalid');
+        return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ days }) };
+      } catch {
+        return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: 'No se pudo generar el calendario. Inténtalo de nuevo.' }) };
+      }
     }
 
     if (type === 'ideas') {
