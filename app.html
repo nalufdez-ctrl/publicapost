@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-MMRGKZVX');</script>
+  <!-- End Google Tag Manager -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PublicaPost — Genera posts para redes sociales al instante</title>
@@ -652,6 +655,53 @@
       color: var(--muted); padding: 0; transition: color .15s;
     }
     .cal-expand-btn:hover { color: var(--text); }
+
+    .cal-post-block { margin-top: 10px; }
+
+    .cal-post-block + .cal-post-block {
+      padding-top: 10px; border-top: 1px solid var(--border);
+    }
+
+    .cal-post-block-head {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+
+    .cal-net-select {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: inherit; font-size: 0.8rem; font-weight: 600;
+      padding: 5px 10px; cursor: pointer; outline: none;
+      transition: border-color .15s; flex-shrink: 0;
+    }
+    .cal-net-select:focus { border-color: var(--border-h); }
+
+    .cal-post-ta {
+      width: 100%; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 10px;
+      color: var(--text); font-family: inherit;
+      font-size: 0.88rem; line-height: 1.75;
+      padding: 13px 15px; resize: vertical; min-height: 80px;
+      outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    .cal-post-ta:focus {
+      border-color: #dc2743;
+      box-shadow: 0 0 0 3px rgba(220,39,67,.12);
+    }
+
+    .cal-post-footer {
+      display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;
+    }
+
+    .cal-add-btn {
+      width: 100%; background: none;
+      border: 1px dashed var(--border); border-radius: 10px;
+      color: var(--muted); cursor: pointer;
+      font-family: inherit; font-size: 0.82rem; font-weight: 600;
+      padding: 10px; margin-top: 12px;
+      transition: color .15s, border-color .15s;
+    }
+    .cal-add-btn:hover { color: var(--text); border-color: var(--border-h); }
+    .cal-add-btn:disabled { opacity: .35; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -1230,6 +1280,15 @@
   const CAL_NET_ICONS = {
     instagram: '📸', linkedin: '💼', twitter: '𝕏', facebook: '👥', tiktok: '🎵',
   };
+  const CAL_NET_OPTS = ['instagram','linkedin','twitter','facebook','tiktok'];
+
+  let calPlan     = [];
+  let calBusiness = '';
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
 
   function toggleCalNet(btn) {
     const active = document.querySelectorAll('.cal-net.active');
@@ -1241,6 +1300,7 @@
     document.getElementById('calResultsWrap').classList.remove('show');
     document.getElementById('calGrid').innerHTML = '';
     hideCalErr();
+    calPlan = []; calBusiness = '';
   }
 
   function showCalErr(msg) {
@@ -1249,22 +1309,26 @@
   }
   function hideCalErr() { document.getElementById('calErr').style.display = 'none'; }
 
+  function calNetOpts(selected) {
+    return CAL_NET_OPTS.map(n =>
+      `<option value="${n}" ${n === selected ? 'selected' : ''}>${CAL_NET_ICONS[n]} ${CAL_NET_LABELS[n]}</option>`
+    ).join('');
+  }
+
   function renderCalSkeleton() {
     const grid = document.getElementById('calGrid');
     grid.innerHTML = '';
-    const dayNames = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-    dayNames.forEach((d, i) => {
+    ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'].forEach((d, i) => {
       grid.insertAdjacentHTML('beforeend', `
         <div class="cal-card" id="cal-card-${i}">
           <div class="cal-card-top" id="cal-top-${i}">
             <div class="cal-day-num" style="opacity:.25">${String(i+1).padStart(2,'0')}</div>
             <div class="cal-day-name" style="opacity:.25">${d}</div>
-            <div class="skel" style="width:72px;height:22px;border-radius:999px;flex-shrink:0"></div>
             <div class="skel" style="width:52px;height:22px;border-radius:6px;flex-shrink:0"></div>
           </div>
           <div class="cal-card-body">
             <div class="skel" style="width:38%;height:10px;margin-bottom:12px" id="cal-topic-skel-${i}"></div>
-            <div id="cal-post-wrap-${i}">
+            <div id="cal-posts-${i}">
               <div class="skel" style="width:94%"></div>
               <div class="skel" style="width:80%"></div>
               <div class="skel" style="width:87%"></div>
@@ -1278,48 +1342,114 @@
   }
 
   function fillCalCardHeader(i, day) {
-    const net   = day.network || 'instagram';
-    const color = CAL_NET_COLORS[net] || '#666';
-    const label = CAL_NET_LABELS[net] || net;
-    const icon  = CAL_NET_ICONS[net]  || '';
     document.getElementById(`cal-top-${i}`).innerHTML = `
       <div class="cal-day-num">${String(i+1).padStart(2,'0')}</div>
       <div class="cal-day-name">${escHtml(day.day)}</div>
-      <span class="cal-net-badge" style="background:${color}">${icon} ${escHtml(label)}</span>
       <span class="cal-time-badge">🕐 ${escHtml(day.time || '')}</span>`;
     const topicSkel = document.getElementById(`cal-topic-skel-${i}`);
-    if (topicSkel) {
-      topicSkel.outerHTML = `<div class="cal-topic" id="cal-topic-${i}">${escHtml(day.topic || '')}</div>`;
+    if (topicSkel) topicSkel.outerHTML = `<div class="cal-topic" id="cal-topic-${i}">${escHtml(day.topic || '')}</div>`;
+  }
+
+  function addCalPostBlock(cardIdx, postIdx, network, text, isLoading) {
+    const container = document.getElementById(`cal-posts-${cardIdx}`);
+    if (!container) return;
+    if (postIdx === 0) container.innerHTML = '';
+
+    const blockId = `cal-block-${cardIdx}-${postIdx}`;
+    container.insertAdjacentHTML('beforeend', `
+      <div class="cal-post-block" id="${blockId}">
+        <div class="cal-post-block-head">
+          <select class="cal-net-select" id="cal-net-${cardIdx}-${postIdx}">
+            ${calNetOpts(network)}
+          </select>
+        </div>
+        <textarea class="cal-post-ta" id="cal-ta-${cardIdx}-${postIdx}" oninput="autoResize(this)">${isLoading ? '' : escHtml(text || '')}</textarea>
+        <div class="cal-post-footer">
+          <button class="act-btn" id="cal-regen-${cardIdx}-${postIdx}" onclick="regenCalPost(${cardIdx},${postIdx})">↺ Regenerar</button>
+          <button class="act-btn" onclick="copyCalPostBlock(${cardIdx},${postIdx})">Copiar</button>
+        </div>
+      </div>`);
+
+    const ta = document.getElementById(`cal-ta-${cardIdx}-${postIdx}`);
+    if (ta && !isLoading) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+
+    // Add "+" button after first post block
+    if (postIdx === 0 && !document.getElementById(`cal-add-${cardIdx}`)) {
+      container.insertAdjacentHTML('afterend',
+        `<button class="cal-add-btn" id="cal-add-${cardIdx}" onclick="addCalPost(${cardIdx})">+ Añadir otra publicación</button>`);
     }
   }
 
-  function fillCalPost(i, text, errMsg) {
-    const wrap = document.getElementById(`cal-post-wrap-${i}`);
-    if (!wrap) return;
-    if (errMsg) {
-      wrap.innerHTML = `<div class="res-body card-err">⚠ ${escHtml(errMsg)}</div>`;
-      return;
+  function fillCalPostText(cardIdx, postIdx, text, errMsg) {
+    const ta = document.getElementById(`cal-ta-${cardIdx}-${postIdx}`);
+    const regen = document.getElementById(`cal-regen-${cardIdx}-${postIdx}`);
+    if (!ta) return;
+    if (errMsg) { ta.value = '⚠ ' + errMsg; }
+    else { ta.value = text || ''; ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+    if (regen) regen.disabled = false;
+  }
+
+  async function regenCalPost(cardIdx, postIdx) {
+    const netEl  = document.getElementById(`cal-net-${cardIdx}-${postIdx}`);
+    const regenEl = document.getElementById(`cal-regen-${cardIdx}-${postIdx}`);
+    const taEl   = document.getElementById(`cal-ta-${cardIdx}-${postIdx}`);
+    if (!netEl || !taEl) return;
+
+    const network = netEl.value;
+    const topic   = calPlan[cardIdx]?.topic || '';
+
+    if (regenEl) { regenEl.disabled = true; regenEl.textContent = '…'; }
+    taEl.value = '';
+
+    try {
+      const res  = await fetch('/.netlify/functions/generate', {
+        method:  'POST',
+        headers: { 'content-type': 'application/json' },
+        body:    JSON.stringify({ type: 'calendar-post', platform: network, business: calBusiness, content: topic, tone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `Error ${res.status}`);
+      fillCalPostText(cardIdx, postIdx, data.text);
+    } catch (e) {
+      fillCalPostText(cardIdx, postIdx, '', e.message);
     }
-    wrap.innerHTML = `
-      <div class="cal-post" id="calpost-${i}">${escHtml(text)}</div>
-      <div class="cal-card-footer">
-        <button class="cal-expand-btn" id="calexp-${i}" onclick="toggleCalPost(${i}, this)">Ver más ↓</button>
-        <button class="act-btn" onclick="copyCalPost(${i})">Copiar</button>
-      </div>`;
+
+    if (regenEl) { regenEl.disabled = false; regenEl.textContent = '↺ Regenerar'; }
   }
 
-  function toggleCalPost(i, btn) {
-    const el = document.getElementById(`calpost-${i}`);
-    const expanded = el.classList.toggle('expanded');
-    btn.textContent = expanded ? 'Ver menos ↑' : 'Ver más ↓';
+  async function addCalPost(cardIdx) {
+    const addBtn = document.getElementById(`cal-add-${cardIdx}`);
+    if (addBtn) { addBtn.disabled = true; addBtn.textContent = 'Generando…'; }
+
+    const container = document.getElementById(`cal-posts-${cardIdx}`);
+    const postIdx   = container ? container.querySelectorAll('.cal-post-block').length : 1;
+    const network   = calPlan[cardIdx]?.network || 'instagram';
+    const topic     = calPlan[cardIdx]?.topic   || '';
+
+    addCalPostBlock(cardIdx, postIdx, network, '', true);
+
+    try {
+      const res  = await fetch('/.netlify/functions/generate', {
+        method:  'POST',
+        headers: { 'content-type': 'application/json' },
+        body:    JSON.stringify({ type: 'calendar-post', platform: network, business: calBusiness, content: topic, tone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `Error ${res.status}`);
+      fillCalPostText(cardIdx, postIdx, data.text);
+    } catch (e) {
+      fillCalPostText(cardIdx, postIdx, '', e.message);
+    }
+
+    if (addBtn) { addBtn.disabled = false; addBtn.textContent = '+ Añadir otra publicación'; }
   }
 
-  function copyCalPost(i) {
-    const el = document.getElementById(`calpost-${i}`);
-    if (!el) return;
-    navigator.clipboard.writeText(el.textContent).then(() => {
-      const btns = el.closest('.cal-card').querySelectorAll('.act-btn');
-      btns.forEach(b => { b.textContent = '¡Copiado!'; setTimeout(() => { b.textContent = 'Copiar'; }, 2000); });
+  function copyCalPostBlock(cardIdx, postIdx) {
+    const ta = document.getElementById(`cal-ta-${cardIdx}-${postIdx}`);
+    if (!ta) return;
+    navigator.clipboard.writeText(ta.value).then(() => {
+      const btns = document.getElementById(`cal-block-${cardIdx}-${postIdx}`)?.querySelectorAll('.act-btn');
+      btns?.forEach(b => { if (b.textContent === 'Copiar') { b.textContent = '¡Copiado!'; setTimeout(() => { b.textContent = 'Copiar'; }, 2000); } });
     });
   }
 
@@ -1334,8 +1464,7 @@
     setLoading(true);
     renderCalSkeleton();
 
-    // Step 1: get the 7-day plan (fast, small JSON)
-    let plan;
+    // Step 1: plan (fast, small JSON)
     try {
       const res  = await fetch('/.netlify/functions/generate', {
         method:  'POST',
@@ -1344,26 +1473,29 @@
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || `Error ${res.status}`);
-      plan = data.days;
+      calPlan     = data.days;
+      calBusiness = business;
     } catch (e) {
       showCalErr(e.message);
       setLoading(false);
       return;
     }
 
-    // Fill in headers while posts load
-    plan.forEach((day, i) => fillCalCardHeader(i, day));
+    calPlan.forEach((day, i) => {
+      fillCalCardHeader(i, day);
+      addCalPostBlock(i, 0, day.network, '', true);
+    });
 
-    // Step 2: generate each post in parallel (reuses existing prompts, fast)
-    await Promise.all(plan.map((day, i) =>
+    // Step 2: 7 posts in parallel
+    await Promise.all(calPlan.map((day, i) =>
       fetch('/.netlify/functions/generate', {
         method:  'POST',
         headers: { 'content-type': 'application/json' },
         body:    JSON.stringify({ type: 'calendar-post', platform: day.network, business, content: day.topic, tone }),
       })
       .then(r => r.json().catch(() => ({})))
-      .then(data => fillCalPost(i, data.text || '', data.error && !data.text ? data.error : null))
-      .catch(e => fillCalPost(i, '', e.message))
+      .then(data => fillCalPostText(i, 0, data.text || '', data.error && !data.text ? data.error : null))
+      .catch(e => fillCalPostText(i, 0, '', e.message))
     ));
 
     setLoading(false);
