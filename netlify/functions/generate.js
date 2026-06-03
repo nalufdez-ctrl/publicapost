@@ -167,23 +167,18 @@ Sin numeración, sin títulos, sin explicaciones previas. Solo los 5 posts separ
 
 // ─── Prompt: calendario semanal ──────────────────────────────────────────────
 
-const CALENDAR_PROMPT = `Eres un experto en estrategia de contenido para redes sociales. El usuario te dará la descripción de su negocio y las redes que utiliza.
+const CALENDAR_PLAN_PROMPT = `Eres un planificador de contenido para redes sociales.
 
-Tu tarea: crear un plan de contenido para exactamente 7 días (Lunes a Domingo). Para cada día:
-- Elige la red social más adecuada para ese tipo de contenido ese día
-- Distribuye las redes de forma equilibrada a lo largo de la semana
-- Asigna el mejor horario de publicación para esa red (basado en datos reales de engagement)
-- Escribe el texto completo del post, completamente listo para publicar, adaptado al formato nativo de esa red
-- Varía los temas: consejos del sector, detrás de las cámaras, engagement, novedades, inspiración, storytelling, preguntas a la audiencia
+El usuario te dará su negocio y las redes que usa. Crea un plan de 7 días (Lunes a Domingo): para cada día elige la red más adecuada, el horario óptimo y un tema concreto.
 
-RESPONDE ÚNICAMENTE con un array JSON válido con exactamente 7 objetos. Sin texto antes ni después. Sin bloques de código markdown. Solo el array JSON puro.
+RESPONDE ÚNICAMENTE con un array JSON válido. Sin texto antes ni después. Sin markdown. Solo el JSON:
+[{"day":"Lunes","network":"instagram","time":"18:00","topic":"tema en 4-6 palabras en español"},{"day":"Martes",...},{"day":"Miércoles",...},{"day":"Jueves",...},{"day":"Viernes",...},{"day":"Sábado",...},{"day":"Domingo",...}]
 
-Estructura exacta de cada objeto:
-{"day":"Lunes","network":"instagram","time":"18:00","topic":"resumen del tema en 4-6 palabras","post":"texto completo del post listo para publicar"}
-
-Días en orden: Lunes, Martes, Miércoles, Jueves, Viernes, Sábado, Domingo.
-Valores válidos para "network": instagram, linkedin, twitter, facebook, tiktok.
-Idioma de los posts: español siempre.`;
+Reglas:
+- Usa SOLO las redes que el usuario ha indicado
+- Distribuye las redes de forma equilibrada
+- Varía los temas: consejos, detrás de cámaras, engagement, testimonios, novedades, inspiración
+- Valores exactos para "network": instagram, linkedin, twitter, facebook, tiktok`;
 
 // ─── Shared ───────────────────────────────────────────────────────────────────
 
@@ -220,20 +215,29 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'JSON inválido' }) };
   }
 
-  if (!['adapt', 'ideas', 'calendar'].includes(type)) {
+  if (!['adapt', 'ideas', 'calendar-plan', 'calendar-post'].includes(type)) {
     return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Tipo de solicitud no válido' }) };
   }
 
-  if (type !== 'calendar' && (!platform || !(type === 'adapt' ? PROMPTS : IDEAS_PROMPTS)[platform])) {
+  const isCalendar = type === 'calendar-plan' || type === 'calendar-post';
+
+  if (!isCalendar && (!platform || !(type === 'adapt' ? PROMPTS : IDEAS_PROMPTS)[platform])) {
     return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Plataforma no válida' }) };
   }
 
-  if (type === 'calendar') {
+  if (type === 'calendar-plan') {
     if (!business || business.trim().length < 3) {
       return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Describe tu negocio para continuar' }) };
     }
     if (!Array.isArray(networks) || networks.length === 0) {
       return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Selecciona al menos una red social' }) };
+    }
+  } else if (type === 'calendar-post') {
+    if (!platform || !PROMPTS[platform]) {
+      return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Plataforma no válida' }) };
+    }
+    if (!business || !content) {
+      return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Faltan datos para el post' }) };
     }
   } else if (!content || (type === 'adapt' && content.trim().length < 30)) {
     return {
@@ -251,11 +255,14 @@ exports.handler = async (event) => {
   const toneModifier = TONE_MODIFIERS[tone] || TONE_MODIFIERS.profesional;
   let fullSystemPrompt, userMessage;
 
-  if (type === 'calendar') {
+  if (type === 'calendar-plan') {
     const validNets = ['instagram', 'linkedin', 'twitter', 'facebook', 'tiktok'];
     const netList   = networks.filter(n => validNets.includes(n)).join(', ');
-    fullSystemPrompt = CALENDAR_PROMPT + toneModifier;
+    fullSystemPrompt = CALENDAR_PLAN_PROMPT;
     userMessage      = `Mi negocio: ${business.trim()}\nRedes que uso: ${netList}`;
+  } else if (type === 'calendar-post') {
+    fullSystemPrompt = PROMPTS[platform] + toneModifier;
+    userMessage      = `Crea un post para ${META[platform]}.\n\nNegocio: ${business.trim()}\nTema del post: ${content.trim()}`;
   } else {
     const systemPrompt = type === 'adapt' ? PROMPTS[platform] : IDEAS_PROMPTS[platform];
     fullSystemPrompt   = systemPrompt + toneModifier;
@@ -274,7 +281,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model:      'claude-sonnet-4-6',
-        max_tokens: type === 'calendar' ? 4000 : type === 'ideas' ? 3000 : 512,
+        max_tokens: type === 'calendar-plan' ? 600 : type === 'ideas' ? 3000 : 512,
         system:     fullSystemPrompt,
         messages: [{ role: 'user', content: userMessage }],
       }),
@@ -293,7 +300,7 @@ exports.handler = async (event) => {
       return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: 'Respuesta vacía de la API' }) };
     }
 
-    if (type === 'calendar') {
+    if (type === 'calendar-plan') {
       try {
         let jsonStr = text.trim();
         if (jsonStr.startsWith('```')) {
@@ -303,7 +310,7 @@ exports.handler = async (event) => {
         if (!Array.isArray(days) || days.length === 0) throw new Error('invalid');
         return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ days }) };
       } catch {
-        return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: 'No se pudo generar el calendario. Inténtalo de nuevo.' }) };
+        return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: 'No se pudo generar el plan. Inténtalo de nuevo.' }) };
       }
     }
 
